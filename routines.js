@@ -4,6 +4,7 @@
 
   const API_URL = "/rule-engine-proxy";
   const ROUTINE_SOURCE = "dashboard-routine-v1";
+  const MAX_ROUTINE_DEVICES = 200;
   const DAY_LABELS = {
     mon: "Seg",
     tue: "Ter",
@@ -18,6 +19,7 @@
   const state = {
     devices: [],
     rules: [],
+    editingRoutineId: "",
     loading: false,
   };
 
@@ -50,6 +52,11 @@
     if (!el) return;
     el.textContent = message || "";
     el.dataset.state = type || "neutral";
+  }
+
+  function isEditMode() {
+    const builder = document.querySelector(".routines-builder-page");
+    return builder?.dataset.mode === "edit" || global.location?.hash === "#routines-editar";
   }
 
   async function api(path, options = {}) {
@@ -177,6 +184,8 @@
 
         return {
           ...group,
+          onRule,
+          offRule,
           name: String(reference.name || "Rotina").replace(/\s+-\s+(ligar|desligar)$/i, ""),
           enabled: group.rules.every((rule) => rule.enabled !== false),
           deviceId: deviceIds[0] || "",
@@ -189,6 +198,15 @@
       .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   }
 
+  function getRoutines() {
+    return groupRoutines(state.rules);
+  }
+
+  function getRoutineById(routineId) {
+    const id = String(routineId || "").trim();
+    return getRoutines().find((routine) => routine.id === id);
+  }
+
   function formatDays(days) {
     const normalized = Array.isArray(days) && days.length ? days : DAY_ORDER;
     if (DAY_ORDER.every((day) => normalized.includes(day))) return "Todos os dias";
@@ -198,7 +216,7 @@
   }
 
   function renderRoutineCard(routine) {
-    const deviceLabel = formatDeviceLabels(routine.deviceIds || [routine.deviceId]);
+    const deviceLabel = formatRoutineDeviceSummary(routine);
     return `
       <article class="routine-card" data-routine-id="${escapeHtml(routine.id)}">
         <div class="routine-card__top">
@@ -215,6 +233,15 @@
           </span>
         </div>
         <div class="routine-card__actions">
+          <button type="button" class="routines-btn routines-btn--secondary" data-routine-action="edit">
+            Editar
+          </button>
+          <button type="button" class="routines-btn routines-btn--ghost" data-routine-action="run-on">
+            Ligar agora
+          </button>
+          <button type="button" class="routines-btn routines-btn--ghost" data-routine-action="run-off">
+            Desligar agora
+          </button>
           <button type="button" class="routines-btn routines-btn--secondary" data-routine-action="${routine.enabled ? "disable" : "enable"}">
             ${routine.enabled ? "Pausar" : "Ativar"}
           </button>
@@ -235,7 +262,7 @@
 
     try {
       await Promise.all([loadDevices(), loadRules()]);
-      const routines = groupRoutines(state.rules);
+      const routines = getRoutines();
       if (!routines.length) {
         list.innerHTML =
           '<p class="routines-empty">Nenhuma rotina criada ainda.</p>';
@@ -262,6 +289,30 @@
       .filter(Boolean);
   }
 
+  function setSelectedDeviceIds(deviceIds) {
+    const selected = new Set(
+      (Array.isArray(deviceIds) ? deviceIds : [deviceIds])
+        .map((id) => String(id || "").trim())
+        .filter(Boolean),
+    );
+
+    document.querySelectorAll(".routine-device").forEach((button) => {
+      const isSelected = selected.has(String(button.dataset.deviceId || "").trim());
+      button.classList.toggle("is-selected", isSelected);
+      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
+    });
+  }
+
+  function setSelectedDays(days) {
+    const selected = new Set(
+      (Array.isArray(days) && days.length ? days : DAY_ORDER).filter(Boolean),
+    );
+
+    document.querySelectorAll(".routine-day").forEach((button) => {
+      button.classList.toggle("is-selected", selected.has(button.dataset.day));
+    });
+  }
+
   function formatDeviceLabels(deviceIds) {
     const ids = (Array.isArray(deviceIds) ? deviceIds : [deviceIds])
       .map((id) => String(id || "").trim())
@@ -270,6 +321,15 @@
     const labels = ids.map(getDeviceLabel);
     if (labels.length <= 3) return labels.join(", ");
     return `${labels.slice(0, 3).join(", ")} +${labels.length - 3}`;
+  }
+
+  function formatRoutineDeviceSummary(routine) {
+    const ids = (Array.isArray(routine?.deviceIds) ? routine.deviceIds : [routine?.deviceId])
+      .map((id) => String(id || "").trim())
+      .filter(Boolean);
+    const label = formatDeviceLabels(ids);
+    if (ids.length <= 1) return label;
+    return `${label} (${ids.length} dispositivos)`;
   }
 
   function updatePreview() {
@@ -313,7 +373,7 @@
       .join("");
   }
 
-  function buildRoutineRules() {
+  function buildRoutineRules(existingRoutine = null) {
     const name = String(byId("routine-name-input")?.value || "").trim();
     const deviceIds = selectedDeviceIds();
     const onTime = normalizeTime(byId("routine-on-time")?.value);
@@ -322,22 +382,26 @@
 
     if (!name) throw new Error("Informe um nome para a rotina.");
     if (!deviceIds.length) throw new Error("Selecione ao menos um dispositivo.");
+    if (deviceIds.length > MAX_ROUTINE_DEVICES) {
+      throw new Error(`Selecione ate ${MAX_ROUTINE_DEVICES} dispositivos por rotina.`);
+    }
     if (!onTime || !offTime) throw new Error("Informe horarios validos.");
     if (onTime === offTime) throw new Error("Os horarios de ligar e desligar precisam ser diferentes.");
     if (!days.length) throw new Error("Selecione ao menos um dia.");
 
-    const routineId = makeId("routine");
+    const routineId = existingRoutine?.id || makeId("routine");
+    const enabled = existingRoutine ? existingRoutine.enabled !== false : true;
     const base = {
       routineId,
       source: ROUTINE_SOURCE,
-      enabled: true,
+      enabled,
       conditions: [],
     };
 
     return [
       {
         ...base,
-        id: `${routineId}_on`,
+        id: existingRoutine?.onRule?.id || `${routineId}_on`,
         name: `${name} - ligar`,
         triggers: [{ type: "time", time: onTime, days }],
         actions: deviceIds.map((deviceId) => ({
@@ -349,7 +413,7 @@
       },
       {
         ...base,
-        id: `${routineId}_off`,
+        id: existingRoutine?.offRule?.id || `${routineId}_off`,
         name: `${name} - desligar`,
         triggers: [{ type: "time", time: offTime, days }],
         actions: deviceIds.map((deviceId) => ({
@@ -367,16 +431,36 @@
     let created = [];
 
     try {
-      const rules = buildRoutineRules();
-      saveBtn.disabled = true;
-      setFeedback("Salvando rotina na Hubitat...", "neutral");
-
-      for (const rule of rules) {
-        const saved = await api("/rules", { method: "POST", body: rule });
-        created.push(saved);
+      const editMode = isEditMode();
+      const existingRoutine = editMode ? getRoutineById(state.editingRoutineId) : null;
+      if (editMode && !existingRoutine) {
+        throw new Error("Rotina nao encontrada para editar.");
       }
 
-      setFeedback("Rotina salva na Hubitat.", "success");
+      const rules = buildRoutineRules(existingRoutine);
+      if (saveBtn) saveBtn.disabled = true;
+      setFeedback(
+        editMode ? "Atualizando rotina na Hubitat..." : "Salvando rotina na Hubitat...",
+        "neutral",
+      );
+
+      for (const rule of rules) {
+        const existingRule = editMode
+          ? existingRoutine.rules.find((item) => item.id === rule.id)
+          : null;
+
+        if (existingRule) {
+          await api(`/rules/${rule.id}`, { method: "PUT", body: rule });
+        } else {
+          const saved = await api("/rules", { method: "POST", body: rule });
+          created.push(saved);
+        }
+      }
+
+      if (editMode) {
+        global.sessionStorage?.removeItem("routineEditId");
+      }
+      setFeedback(editMode ? "Rotina atualizada na Hubitat." : "Rotina salva na Hubitat.", "success");
       setTimeout(() => {
         if (typeof global.spaNavigate === "function") {
           global.spaNavigate("scenes");
@@ -398,7 +482,7 @@
   }
 
   async function setRoutineEnabled(routineId, enabled) {
-    const routine = groupRoutines(state.rules).find((item) => item.id === routineId);
+    const routine = getRoutineById(routineId);
     if (!routine) return;
 
     setFeedback(enabled ? "Ativando rotina..." : "Pausando rotina...", "neutral");
@@ -410,7 +494,7 @@
   }
 
   async function deleteRoutine(routineId) {
-    const routine = groupRoutines(state.rules).find((item) => item.id === routineId);
+    const routine = getRoutineById(routineId);
     if (!routine) return;
 
     if (!global.confirm(`Excluir a rotina "${routine.name}"?`)) return;
@@ -420,6 +504,31 @@
       routine.rules.map((rule) => api(`/rules/${rule.id}`, { method: "DELETE" })),
     );
     await renderListPage();
+  }
+
+  function editRoutine(routineId) {
+    if (!getRoutineById(routineId)) {
+      setFeedback("Rotina nao encontrada para editar.", "error");
+      return;
+    }
+
+    global.sessionStorage?.setItem("routineEditId", routineId);
+    if (typeof global.spaNavigate === "function") {
+      global.spaNavigate("routines-editar");
+    } else {
+      global.location.hash = "routines-editar";
+    }
+  }
+
+  async function runRoutineRule(routineId, command) {
+    const routine = getRoutineById(routineId);
+    const rule = command === "on" ? routine?.onRule : routine?.offRule;
+    const label = command === "on" ? "ligar" : "desligar";
+    if (!rule?.id) throw new Error(`Regra de ${label} nao encontrada.`);
+
+    setFeedback(`Executando ${label} agora...`, "neutral");
+    await api(`/rules/${rule.id}/run`, { method: "POST" });
+    setFeedback(`Comando de ${label} enviado para a Hubitat.`, "success");
   }
 
   function bindListPage() {
@@ -442,6 +551,9 @@
         try {
           const action = button.dataset.routineAction;
           const routineId = card.dataset.routineId;
+          if (action === "edit") editRoutine(routineId);
+          if (action === "run-on") await runRoutineRule(routineId, "on");
+          if (action === "run-off") await runRoutineRule(routineId, "off");
           if (action === "enable") await setRoutineEnabled(routineId, true);
           if (action === "disable") await setRoutineEnabled(routineId, false);
           if (action === "delete") await deleteRoutine(routineId);
@@ -452,15 +564,55 @@
     }
   }
 
+  function setBuilderModeText(editMode) {
+    const title = byId("routine-page-title");
+    const saveBtn = byId("routine-save-btn");
+    if (title) title.textContent = editMode ? "Editar Rotina" : "Criar Rotina";
+    if (saveBtn) saveBtn.textContent = editMode ? "Salvar alteracoes" : "Salvar na Hubitat";
+  }
+
+  function applyRoutineToForm(routine) {
+    const nameInput = byId("routine-name-input");
+    const onInput = byId("routine-on-time");
+    const offInput = byId("routine-off-time");
+
+    if (nameInput) nameInput.value = routine.name || "";
+    if (onInput) onInput.value = routine.onTime || "23:00";
+    if (offInput) offInput.value = routine.offTime || "06:00";
+    setSelectedDays(routine.days);
+    setSelectedDeviceIds(routine.deviceIds || [routine.deviceId]);
+    updatePreview();
+  }
+
   async function bindBuilderPage() {
-    setFeedback("Carregando dispositivos autorizados...", "neutral");
+    const editMode = isEditMode();
+    state.editingRoutineId = editMode
+      ? String(global.sessionStorage?.getItem("routineEditId") || "").trim()
+      : "";
+    if (!editMode) global.sessionStorage?.removeItem("routineEditId");
+
+    setBuilderModeText(editMode);
+    setFeedback(
+      editMode ? "Carregando rotina e dispositivos autorizados..." : "Carregando dispositivos autorizados...",
+      "neutral",
+    );
+
     try {
-      await loadDevices();
+      await Promise.all([loadDevices(), editMode ? loadRules() : Promise.resolve()]);
       populateDeviceSelect();
+      if (editMode) {
+        const routine = getRoutineById(state.editingRoutineId);
+        if (!state.editingRoutineId || !routine) {
+          throw new Error("Escolha uma rotina existente para editar.");
+        }
+        applyRoutineToForm(routine);
+      }
       setFeedback("", "neutral");
     } catch (error) {
       populateDeviceSelect();
       setFeedback(error?.message || "Falha ao carregar dispositivos.", "error");
+      const saveBtn = byId("routine-save-btn");
+      if (editMode && saveBtn) saveBtn.disabled = true;
     }
 
     const backBtn = byId("routine-back-btn");

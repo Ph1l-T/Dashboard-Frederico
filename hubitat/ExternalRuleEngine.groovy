@@ -49,6 +49,7 @@ def mainPage() {
       paragraph "Ultimo tick: ${status.lastTick ?: 'nunca'}"
       paragraph "Ultimo disparo por horario: ${status.lastTimeTriggerMatch ?: 'nunca'}"
       if (status.lastSchedulerError) paragraph "Erro do agendador: ${status.lastSchedulerError}"
+      if (status.lastExecutionError) paragraph "Ultimo erro de acao: ${status.lastExecutionError}"
     }
 
     section("Gerenciar regras") {
@@ -82,6 +83,7 @@ def mainPage() {
     section("Limites e logs") {
       input "enableInfoLogging", "bool", title: "Ativar logs informativos", defaultValue: true, required: false
       input "enableDebugLogging", "bool", title: "Ativar logs detalhados", defaultValue: false, required: false
+      input "enableSchedulerDebugLogging", "bool", title: "Ativar diagnostico do agendador", defaultValue: false, required: false
     }
   }
 }
@@ -373,7 +375,7 @@ def scheduledTimeTick() {
       at: isoNow()
     ]
     state.lastSchedulerError = null
-    logDebug("time tick ${currentMinute.time} (${currentMinute.day})")
+    logSchedulerDebug("time tick ${currentMinute.time} (${currentMinute.day})")
 
     getRulesMap().values().findAll { ruleEnabled(it) }.each { rule ->
       (rule.triggers ?: []).eachWithIndex { trigger, index ->
@@ -381,7 +383,7 @@ def scheduledTimeTick() {
           def triggerTime = normalizeTimeOfDay(trigger?.time)
           def triggerDays = normalizeTriggerDays(trigger?.days)
           Boolean matches = timeTriggerMatches(trigger, currentMinute)
-          logDebug("time trigger check: ${rule.name} trigger=${triggerTime ?: trigger?.time} days=${triggerDays ?: 'todos'} current=${currentMinute.time}/${currentMinute.day} previous=${currentMinute.previousTime}/${currentMinute.previousDay} match=${matches}")
+          logSchedulerDebug("time trigger check: ${rule.name} trigger=${triggerTime ?: trigger?.time} days=${triggerDays ?: 'todos'} current=${currentMinute.time}/${currentMinute.day} previous=${currentMinute.previousTime}/${currentMinute.previousDay} match=${matches}")
 
           if (matches) {
             Boolean previousMinuteMatch = triggerTime == normalizeTimeOfDay(currentMinute.previousTime)
@@ -392,7 +394,7 @@ def scheduledTimeTick() {
             def firedKey = "${rule.id}:${index}:${matchedKey}"
             def fired = state.timeTriggerFired instanceof Map ? state.timeTriggerFired : [:]
             if (fired[firedKey]) {
-              logDebug("time trigger already fired: ${firedKey}")
+              logSchedulerDebug("time trigger already fired: ${firedKey}")
             } else {
               fired[firedKey] = now()
               state.timeTriggerFired = fired
@@ -473,7 +475,8 @@ private void executeNextAction(String executionId) {
     List actions = execution.actions instanceof List ? execution.actions : []
 
     if (index >= actions.size()) {
-      logInfo("execution completed: ${executionId}")
+      Integer errorCount = countExecutionActionErrors(executionId)
+      logInfo(errorCount > 0 ? "execution completed with ${errorCount} action error(s): ${executionId}" : "execution completed: ${executionId}")
       executions.remove(executionId)
       state.executions = executions
       return
@@ -491,7 +494,12 @@ private void executeNextAction(String executionId) {
       return
     }
 
-    executeDeviceCommand(action)
+    try {
+      executeDeviceCommand(action)
+    } catch (Exception actionError) {
+      log.warn "Action failed ${executionId}: ${actionError.message}"
+      recordExecutionActionError(executionId, action, actionError)
+    }
     executeNextAction(executionId)
   } catch (Exception e) {
     log.warn "Execution failed ${executionId}: ${e.message}"
@@ -499,6 +507,31 @@ private void executeNextAction(String executionId) {
     executions.remove(executionId)
     state.executions = executions
   }
+}
+
+private Integer countExecutionActionErrors(String executionId) {
+  def errors = state?.lastExecutionErrors instanceof List ? state.lastExecutionErrors : []
+  return errors.count { it?.executionId == executionId } ?: 0
+}
+
+private void recordExecutionActionError(String executionId, action, Exception error) {
+  def executions = getExecutionsMap()
+  def execution = executions[executionId] instanceof Map ? executions[executionId] : [:]
+  def actionMap = action instanceof Map ? action : [:]
+  def errors = state?.lastExecutionErrors instanceof List ? state.lastExecutionErrors : []
+  errors.add([
+    executionId: executionId,
+    ruleId: execution.ruleId ?: "",
+    deviceId: "${actionMap.deviceId ?: ""}",
+    command: "${actionMap.command ?: ""}",
+    message: "${error?.message ?: "Unknown action error"}",
+    at: isoNow()
+  ])
+
+  while (errors.size() > 20) {
+    errors.remove(0)
+  }
+  state.lastExecutionErrors = errors
 }
 
 private void executeDeviceCommand(action) {
@@ -549,6 +582,7 @@ private void validateRuleOrThrow(Map rule) {
   if (!rule.name?.trim()) throw new IllegalArgumentException("Rule name is required")
   if (rule.triggers.size() > 5) throw new IllegalArgumentException("Too many triggers")
   if (rule.conditions.size() > 10) throw new IllegalArgumentException("Too many conditions")
+  if (rule.actions.size() > 200) throw new IllegalArgumentException("Too many actions")
   if (rule.triggers.isEmpty()) throw new IllegalArgumentException("At least one trigger is required")
   if (rule.actions.isEmpty()) throw new IllegalArgumentException("At least one action is required")
 
@@ -912,6 +946,9 @@ private Map schedulerStatus() {
   def lastTickText = lastTick ? "${lastTick.date} ${lastTick.time} (${lastTick.day})" : ""
   def lastMatch = state?.lastTimeTriggerMatch instanceof Map ? state.lastTimeTriggerMatch : null
   def lastMatchText = lastMatch ? "${lastMatch.ruleName ?: lastMatch.ruleId} em ${lastMatch.time} (${lastMatch.day})" : ""
+  def actionErrors = state?.lastExecutionErrors instanceof List ? state.lastExecutionErrors : []
+  def lastActionError = actionErrors ? actionErrors[actionErrors.size() - 1] : null
+  def lastActionErrorText = lastActionError ? "${lastActionError.ruleId ?: 'regra'} ${lastActionError.deviceId ?: 'device'} ${lastActionError.command ?: 'comando'}: ${lastActionError.message ?: 'erro'}" : ""
 
   return [
     ruleCount: rules?.size() ?: 0,
@@ -921,7 +958,8 @@ private Map schedulerStatus() {
     schedulerStartedAt: state?.schedulerStartedAt ?: "",
     lastTick: lastTickText,
     lastTimeTriggerMatch: lastMatchText,
-    lastSchedulerError: state?.lastSchedulerError ?: ""
+    lastSchedulerError: state?.lastSchedulerError ?: "",
+    lastExecutionError: lastActionErrorText
   ]
 }
 
@@ -1493,4 +1531,8 @@ private void logInfo(String message) {
 
 private void logDebug(String message) {
   if (settings?.enableDebugLogging == true) log.debug message
+}
+
+private void logSchedulerDebug(String message) {
+  if (settings?.enableSchedulerDebugLogging == true) log.debug message
 }
