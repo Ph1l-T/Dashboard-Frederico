@@ -15,7 +15,7 @@ const excludeDirs = new Set([
   "Home-Main-Port-Kit",
   "hubitat",
   "scripts",
-  "functions"
+  "functions",
 ]);
 
 const excludeFiles = new Set([
@@ -41,7 +41,7 @@ const excludeFiles = new Set([
   "wrangler.json",
   "wrangler.jsonc",
   "wrangler.toml",
-  "yarn.lock"
+  "yarn.lock",
 ]);
 
 function resetDir(dir) {

@@ -335,6 +335,7 @@
 }
 
 .routines-days-card,
+.routines-devices-card,
 .routines-preview {
   margin-top: 16px;
   padding: 14px;
@@ -354,13 +355,27 @@
   font-weight: 700;
 }
 
+.routines-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.routines-devices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
 .routines-days {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
 }
 
-.routine-day {
+.routine-day,
+.routine-device {
   min-height: 38px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
@@ -372,9 +387,22 @@
   font-weight: 700;
 }
 
-.routine-day.is-selected {
+.routine-device {
+  min-height: 44px;
+  padding: 0 12px;
+  text-align: left;
+}
+
+.routine-day.is-selected,
+.routine-device.is-selected {
   color: #101010;
   background: #fff;
+}
+
+.routines-empty--inline {
+  grid-column: 1 / -1;
+  padding: 14px;
+  text-align: left;
 }
 
 .routines-preview {
@@ -436,9 +464,14 @@
   }
 
   .routines-days-card,
+  .routines-devices-card,
   .routines-preview {
     margin-top: 12px;
     padding: 12px;
+  }
+
+  .routines-devices {
+    grid-template-columns: 1fr;
   }
 
   .routines-days {
@@ -467,5 +500,14 @@
 
   .routines-days {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .routines-inline-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .routines-inline-actions .routines-btn {
+    flex: 1 1 0;
   }
 }

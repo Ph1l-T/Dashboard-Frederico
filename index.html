@@ -36,7 +36,7 @@
     <link rel="preload" href="styles.css?v=1.0.41" as="style" />
     <link rel="stylesheet" href="styles.css?v=1.0.41" />
     <link rel="stylesheet" href="main-home.css?v=1.0.0" />
-    <link rel="stylesheet" href="routines.css?v=1.0.1" />
+    <link rel="stylesheet" href="routines.css?v=1.0.2" />
     <script src="config.js?v=1.0.21"></script>
     <link rel="icon" href="images/pwa/app-icon-192.png" type="image/png" />
     <link rel="manifest" href="manifest.json" />
@@ -1814,7 +1814,7 @@
         if (routinesScriptPromise) return routinesScriptPromise;
         routinesScriptPromise = new Promise((resolve, reject) => {
           const script = document.createElement("script");
-          script.src = "routines.js?v=1.0.0";
+          script.src = "routines.js?v=1.0.1";
           script.async = true;
           script.onload = resolve;
           script.onerror = () =>
@@ -4209,7 +4209,7 @@
                             <div class="routines-builder-head">
                                 <span class="routines-kicker">Agenda</span>
                                 <h2 class="routines-title">Ligar e desligar por horário</h2>
-                                <p class="routines-subtitle">Escolha o dispositivo, os horários e os dias da semana.</p>
+                                <p class="routines-subtitle">Escolha os dispositivos, os horários e os dias da semana.</p>
                             </div>
 
                             <div class="routines-form-grid">
@@ -4218,12 +4218,18 @@
                                     <input id="routine-name-input" class="routines-input" type="text" maxlength="80" placeholder="Ex: Luz do jardim" />
                                 </label>
 
-                                <label class="routines-field routines-field--wide">
-                                    <span>Dispositivo</span>
-                                    <select id="routine-device-select" class="routines-input">
-                                        <option value="">Carregando dispositivos...</option>
-                                    </select>
-                                </label>
+                                <div class="routines-devices-card routines-field--wide">
+                                    <div class="routines-days-head">
+                                        <span>Dispositivos</span>
+                                        <div class="routines-inline-actions">
+                                            <button type="button" id="routine-devices-all" class="routines-btn routines-btn--ghost">Todos</button>
+                                            <button type="button" id="routine-devices-clear" class="routines-btn routines-btn--ghost">Limpar</button>
+                                        </div>
+                                    </div>
+                                    <div class="routines-devices" id="routine-device-list">
+                                        <p class="routines-empty routines-empty--inline">Carregando dispositivos...</p>
+                                    </div>
+                                </div>
 
                                 <label class="routines-field">
                                     <span>Ligar às</span>

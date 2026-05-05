@@ -266,7 +266,12 @@ const CLIENT_CONFIG = {
       quickActions: [],
       lights: [
         { id: "DEMO-A01-L01", name: "Luz Principal" },
-        { id: "DEMO-A01-L02", name: "Luz de Apoio", type: "dimmer", defaultLevel: 80 },
+        {
+          id: "DEMO-A01-L02",
+          name: "Luz de Apoio",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
       ],
       curtains: [
         {
@@ -299,7 +304,12 @@ const CLIENT_CONFIG = {
       quickActions: [],
       lights: [
         { id: "DEMO-A02-L01", name: "Luz Principal" },
-        { id: "DEMO-A02-L02", name: "Luz de Apoio", type: "dimmer", defaultLevel: 80 },
+        {
+          id: "DEMO-A02-L02",
+          name: "Luz de Apoio",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
       ],
       curtains: [
         {
@@ -332,7 +342,12 @@ const CLIENT_CONFIG = {
       quickActions: [],
       lights: [
         { id: "DEMO-A03-L01", name: "Luz Principal" },
-        { id: "DEMO-A03-L02", name: "Luz de Apoio", type: "dimmer", defaultLevel: 80 },
+        {
+          id: "DEMO-A03-L02",
+          name: "Luz de Apoio",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
       ],
       curtains: [
         {
@@ -365,7 +380,12 @@ const CLIENT_CONFIG = {
       quickActions: [],
       lights: [
         { id: "DEMO-A04-L01", name: "Luz Principal" },
-        { id: "DEMO-A04-L02", name: "Luz de Apoio", type: "dimmer", defaultLevel: 80 },
+        {
+          id: "DEMO-A04-L02",
+          name: "Luz de Apoio",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
       ],
       curtains: [
         {
@@ -398,7 +418,12 @@ const CLIENT_CONFIG = {
       quickActions: [],
       lights: [
         { id: "DEMO-A05-L01", name: "Luz Principal" },
-        { id: "DEMO-A05-L02", name: "Luz de Apoio", type: "dimmer", defaultLevel: 80 },
+        {
+          id: "DEMO-A05-L02",
+          name: "Luz de Apoio",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
       ],
       curtains: [
         {
@@ -431,7 +456,12 @@ const CLIENT_CONFIG = {
       quickActions: [],
       lights: [
         { id: "DEMO-A06-L01", name: "Luz Principal" },
-        { id: "DEMO-A06-L02", name: "Luz de Apoio", type: "dimmer", defaultLevel: 80 },
+        {
+          id: "DEMO-A06-L02",
+          name: "Luz de Apoio",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
       ],
       curtains: [
         {
@@ -464,7 +494,12 @@ const CLIENT_CONFIG = {
       quickActions: [],
       lights: [
         { id: "DEMO-A07-L01", name: "Luz Principal" },
-        { id: "DEMO-A07-L02", name: "Luz de Apoio", type: "dimmer", defaultLevel: 80 },
+        {
+          id: "DEMO-A07-L02",
+          name: "Luz de Apoio",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
       ],
       curtains: [
         {
@@ -497,7 +532,12 @@ const CLIENT_CONFIG = {
       quickActions: [],
       lights: [
         { id: "DEMO-A08-L01", name: "Luz Principal" },
-        { id: "DEMO-A08-L02", name: "Luz de Apoio", type: "dimmer", defaultLevel: 80 },
+        {
+          id: "DEMO-A08-L02",
+          name: "Luz de Apoio",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
       ],
       curtains: [
         {
@@ -530,7 +570,12 @@ const CLIENT_CONFIG = {
       quickActions: [],
       lights: [
         { id: "DEMO-A09-L01", name: "Luz Principal" },
-        { id: "DEMO-A09-L02", name: "Luz de Apoio", type: "dimmer", defaultLevel: 80 },
+        {
+          id: "DEMO-A09-L02",
+          name: "Luz de Apoio",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
       ],
       curtains: [
         {
@@ -563,7 +608,12 @@ const CLIENT_CONFIG = {
       quickActions: [],
       lights: [
         { id: "DEMO-A10-L01", name: "Luz Principal" },
-        { id: "DEMO-A10-L02", name: "Luz de Apoio", type: "dimmer", defaultLevel: 80 },
+        {
+          id: "DEMO-A10-L02",
+          name: "Luz de Apoio",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
       ],
       curtains: [
         {
@@ -1608,6 +1658,3 @@ window.generateCurtainsControls = generateCurtainsControls;
 window.getAuthConfig = getAuthConfig;
 
 console.log("✅ CLIENT_CONFIG carregado:", CLIENT_CONFIG.clientInfo.name);
-
-
-

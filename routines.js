@@ -124,6 +124,12 @@
     );
   }
 
+  function deviceActions(rule) {
+    return (Array.isArray(rule?.actions) ? rule.actions : []).filter(
+      (action) => action?.type === "deviceCommand",
+    );
+  }
+
   function firstTimeTrigger(rule) {
     return (Array.isArray(rule?.triggers) ? rule.triggers : []).find(
       (trigger) => trigger?.type === "time",
@@ -132,6 +138,17 @@
 
   function commandFromRule(rule) {
     return String(firstDeviceAction(rule)?.command || "").toLowerCase();
+  }
+
+  function deviceIdsFromRules(...rules) {
+    const ids = new Set();
+    rules.forEach((rule) => {
+      deviceActions(rule).forEach((action) => {
+        const id = String(action?.deviceId || "").trim();
+        if (id) ids.add(id);
+      });
+    });
+    return Array.from(ids);
   }
 
   function groupRoutines(rules) {
@@ -153,16 +170,17 @@
         const onRule = group.rules.find((rule) => commandFromRule(rule) === "on");
         const offRule = group.rules.find((rule) => commandFromRule(rule) === "off");
         const reference = onRule || offRule || group.rules[0] || {};
-        const action = firstDeviceAction(reference);
         const trigger = firstTimeTrigger(onRule || reference);
         const offTrigger = firstTimeTrigger(offRule || {});
         const days = trigger?.days || offTrigger?.days || [];
+        const deviceIds = deviceIdsFromRules(onRule, offRule, reference);
 
         return {
           ...group,
           name: String(reference.name || "Rotina").replace(/\s+-\s+(ligar|desligar)$/i, ""),
           enabled: group.rules.every((rule) => rule.enabled !== false),
-          deviceId: action?.deviceId || firstDeviceAction(onRule)?.deviceId || firstDeviceAction(offRule)?.deviceId || "",
+          deviceId: deviceIds[0] || "",
+          deviceIds,
           onTime: firstTimeTrigger(onRule || {})?.time || "",
           offTime: firstTimeTrigger(offRule || {})?.time || "",
           days: Array.isArray(days) ? days : [],
@@ -180,7 +198,7 @@
   }
 
   function renderRoutineCard(routine) {
-    const deviceLabel = getDeviceLabel(routine.deviceId);
+    const deviceLabel = formatDeviceLabels(routine.deviceIds || [routine.deviceId]);
     return `
       <article class="routine-card" data-routine-id="${escapeHtml(routine.id)}">
         <div class="routine-card__top">
@@ -238,52 +256,72 @@
       .filter(Boolean);
   }
 
+  function selectedDeviceIds() {
+    return Array.from(document.querySelectorAll(".routine-device.is-selected"))
+      .map((button) => String(button.dataset.deviceId || "").trim())
+      .filter(Boolean);
+  }
+
+  function formatDeviceLabels(deviceIds) {
+    const ids = (Array.isArray(deviceIds) ? deviceIds : [deviceIds])
+      .map((id) => String(id || "").trim())
+      .filter(Boolean);
+    if (!ids.length) return "Dispositivo";
+    const labels = ids.map(getDeviceLabel);
+    if (labels.length <= 3) return labels.join(", ");
+    return `${labels.slice(0, 3).join(", ")} +${labels.length - 3}`;
+  }
+
   function updatePreview() {
     const preview = byId("routine-preview");
     if (!preview) return;
 
-    const select = byId("routine-device-select");
-    const deviceLabel =
-      select?.selectedOptions?.[0]?.textContent?.trim() || "dispositivo";
+    const deviceIds = selectedDeviceIds();
+    const deviceLabel = deviceIds.length
+      ? formatDeviceLabels(deviceIds)
+      : "dispositivos selecionados";
     const onTime = normalizeTime(byId("routine-on-time")?.value) || "--:--";
     const offTime = normalizeTime(byId("routine-off-time")?.value) || "--:--";
     const days = selectedDays();
 
     preview.innerHTML = `
       Quando for <strong>${escapeHtml(onTime)}</strong>, a Hubitat vai ligar <strong>${escapeHtml(deviceLabel)}</strong>.<br>
-      Quando for <strong>${escapeHtml(offTime)}</strong>, a Hubitat vai desligar o mesmo dispositivo.<br>
+      Quando for <strong>${escapeHtml(offTime)}</strong>, a Hubitat vai desligar os mesmos dispositivos.<br>
       <span>${escapeHtml(formatDays(days))}</span>
     `;
   }
 
   function populateDeviceSelect() {
-    const select = byId("routine-device-select");
-    if (!select) return;
+    const list = byId("routine-device-list");
+    if (!list) return;
 
     if (!state.devices.length) {
-      select.innerHTML =
-        '<option value="">Nenhum switch/dimmer com on/off encontrado</option>';
+      list.innerHTML =
+        '<p class="routines-empty routines-empty--inline">Nenhum switch/dimmer com on/off encontrado</p>';
       return;
     }
 
-    select.innerHTML = [
-      '<option value="">Selecione um dispositivo</option>',
-      ...state.devices.map((device) => {
+    list.innerHTML = state.devices
+      .map((device) => {
         const label = device.label || device.name || device.id;
-        return `<option value="${escapeHtml(device.id)}">${escapeHtml(label)}</option>`;
-      }),
-    ].join("");
+        return `
+          <button type="button" class="routine-device" data-device-id="${escapeHtml(device.id)}" aria-pressed="false">
+            ${escapeHtml(label)}
+          </button>
+        `;
+      })
+      .join("");
   }
 
   function buildRoutineRules() {
     const name = String(byId("routine-name-input")?.value || "").trim();
-    const deviceId = String(byId("routine-device-select")?.value || "").trim();
+    const deviceIds = selectedDeviceIds();
     const onTime = normalizeTime(byId("routine-on-time")?.value);
     const offTime = normalizeTime(byId("routine-off-time")?.value);
     const days = selectedDays();
 
     if (!name) throw new Error("Informe um nome para a rotina.");
-    if (!deviceId) throw new Error("Selecione um dispositivo.");
+    if (!deviceIds.length) throw new Error("Selecione ao menos um dispositivo.");
     if (!onTime || !offTime) throw new Error("Informe horarios validos.");
     if (onTime === offTime) throw new Error("Os horarios de ligar e desligar precisam ser diferentes.");
     if (!days.length) throw new Error("Selecione ao menos um dia.");
@@ -302,14 +340,24 @@
         id: `${routineId}_on`,
         name: `${name} - ligar`,
         triggers: [{ type: "time", time: onTime, days }],
-        actions: [{ type: "deviceCommand", deviceId, command: "on", args: [] }],
+        actions: deviceIds.map((deviceId) => ({
+          type: "deviceCommand",
+          deviceId,
+          command: "on",
+          args: [],
+        })),
       },
       {
         ...base,
         id: `${routineId}_off`,
         name: `${name} - desligar`,
         triggers: [{ type: "time", time: offTime, days }],
-        actions: [{ type: "deviceCommand", deviceId, command: "off", args: [] }],
+        actions: deviceIds.map((deviceId) => ({
+          type: "deviceCommand",
+          deviceId,
+          command: "off",
+          args: [],
+        })),
       },
     ];
   }
@@ -433,6 +481,37 @@
       };
     }
 
+    const allDevicesBtn = byId("routine-devices-all");
+    if (allDevicesBtn) {
+      allDevicesBtn.onclick = () => {
+        document.querySelectorAll(".routine-device").forEach((button) => {
+          button.classList.add("is-selected");
+          button.setAttribute("aria-pressed", "true");
+        });
+        updatePreview();
+      };
+    }
+
+    const clearDevicesBtn = byId("routine-devices-clear");
+    if (clearDevicesBtn) {
+      clearDevicesBtn.onclick = () => {
+        document.querySelectorAll(".routine-device").forEach((button) => {
+          button.classList.remove("is-selected");
+          button.setAttribute("aria-pressed", "false");
+        });
+        updatePreview();
+      };
+    }
+
+    document.querySelectorAll(".routine-device").forEach((button) => {
+      button.onclick = () => {
+        const selected = !button.classList.contains("is-selected");
+        button.classList.toggle("is-selected", selected);
+        button.setAttribute("aria-pressed", selected ? "true" : "false");
+        updatePreview();
+      };
+    });
+
     document.querySelectorAll(".routine-day").forEach((button) => {
       button.onclick = () => {
         button.classList.toggle("is-selected");
@@ -442,7 +521,6 @@
 
     [
       "routine-name-input",
-      "routine-device-select",
       "routine-on-time",
       "routine-off-time",
     ].forEach((id) => {
