@@ -23,6 +23,7 @@
     editingRoutineId: "",
     loading: false,
   };
+  let activeRoutineConfirmationResolver = null;
 
   function byId(id) {
     return document.getElementById(id);
@@ -80,6 +81,73 @@
     const normalized = String(message || "").trim();
     el.textContent = /^HTTP\s+\d{3}$/i.test(normalized) ? "" : normalized;
     el.dataset.state = type || "neutral";
+  }
+
+  function requestRoutineConfirmation(message, options = {}) {
+    const overlay = byId("confirmation-popup");
+    const titleEl = byId("popup-title");
+    const messageEl = byId("popup-message");
+    const confirmBtn = byId("popup-confirm");
+    const cancelBtn = byId("popup-cancel");
+
+    if (!overlay || !messageEl || !confirmBtn || !cancelBtn) {
+      return Promise.resolve(global.confirm(String(message || "")));
+    }
+
+    if (activeRoutineConfirmationResolver) {
+      activeRoutineConfirmationResolver(false);
+      activeRoutineConfirmationResolver = null;
+    }
+
+    const title = String(options.title || "Confirmar ação").trim() || "Confirmar ação";
+    const confirmLabel = String(options.confirmLabel || "Confirmar").trim() || "Confirmar";
+    const destructive = Boolean(options.destructive);
+
+    return new Promise((resolve) => {
+      const finish = (confirmed) => {
+        overlay.style.display = "none";
+        overlay.setAttribute("aria-hidden", "true");
+        if (titleEl) titleEl.textContent = "Confirmar ação";
+        messageEl.textContent = "";
+        confirmBtn.textContent = "Confirmar";
+        confirmBtn.classList.toggle("is-danger", false);
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+        overlay.onclick = null;
+        document.removeEventListener("keydown", handleKeyDown);
+        if (activeRoutineConfirmationResolver === finish) {
+          activeRoutineConfirmationResolver = null;
+        }
+        resolve(Boolean(confirmed));
+      };
+
+      const handleKeyDown = (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          finish(false);
+          return;
+        }
+        if (event.key === "Enter") {
+          event.preventDefault();
+          finish(true);
+        }
+      };
+
+      activeRoutineConfirmationResolver = finish;
+      if (titleEl) titleEl.textContent = title;
+      messageEl.textContent = String(message || "").trim();
+      confirmBtn.textContent = confirmLabel;
+      confirmBtn.classList.toggle("is-danger", destructive);
+      overlay.style.display = "flex";
+      overlay.setAttribute("aria-hidden", "false");
+      confirmBtn.onclick = () => finish(true);
+      cancelBtn.onclick = () => finish(false);
+      overlay.onclick = (event) => {
+        if (event.target === overlay) finish(false);
+      };
+      document.addEventListener("keydown", handleKeyDown);
+      confirmBtn.focus?.();
+    });
   }
 
   function isEditMode() {
@@ -809,7 +877,11 @@
     const routine = getRoutineById(routineId);
     if (!routine) return;
 
-    if (!global.confirm(`Excluir a rotina "${routine.name}"?`)) return;
+    const confirmed = await requestRoutineConfirmation(
+      `Esta ação remove a rotina "${routine.name}" e não pode ser desfeita.`,
+      { title: "Excluir rotina", confirmLabel: "Excluir", destructive: true },
+    );
+    if (!confirmed) return;
 
     setFeedback("Excluindo rotina...", "neutral");
     await Promise.all(

@@ -841,6 +841,7 @@
 
   function requestSceneConfirmation(message, options = {}) {
     const overlay = getEl("confirmation-popup");
+    const titleEl = getEl("popup-title");
     const messageEl = getEl("popup-message");
     const confirmBtn = getEl("popup-confirm");
     const cancelBtn = getEl("popup-cancel");
@@ -855,12 +856,14 @@
     }
 
     const confirmLabel = String(options.confirmLabel || "Confirmar").trim() || "Confirmar";
+    const title = String(options.title || "Confirmar ação").trim() || "Confirmar ação";
     const destructive = Boolean(options.destructive);
 
     return new Promise((resolve) => {
       const finish = (confirmed) => {
         overlay.style.display = "none";
         overlay.setAttribute("aria-hidden", "true");
+        if (titleEl) titleEl.textContent = "Confirmar ação";
         messageEl.textContent = "";
         confirmBtn.textContent = "Confirmar";
         confirmBtn.classList.toggle("is-danger", false);
@@ -887,6 +890,7 @@
       };
 
       activeSceneConfirmationResolver = finish;
+      if (titleEl) titleEl.textContent = title;
       messageEl.textContent = String(message || "").trim();
       confirmBtn.textContent = confirmLabel;
       confirmBtn.classList.toggle("is-danger", destructive);
@@ -2908,8 +2912,8 @@
 
     if (action === "delete") {
       const confirmed = await requestSceneConfirmation(
-        `Excluir o cenário "${scene.name}"?`,
-        { confirmLabel: "Excluir", destructive: true },
+        `Esta ação remove o cenário "${scene.name}" e não pode ser desfeita.`,
+        { title: "Excluir cenário", confirmLabel: "Excluir", destructive: true },
       );
       if (!confirmed) return;
       try {
