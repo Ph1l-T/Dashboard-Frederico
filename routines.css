@@ -337,6 +337,43 @@
   outline-offset: 2px;
 }
 
+.routines-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.routines-action-field {
+  align-content: start;
+}
+
+.routines-action-field.is-disabled {
+  color: rgba(255, 255, 255, 0.44);
+}
+
+.routines-action-field__head {
+  display: flex;
+  min-height: 24px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.routines-check-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.74);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.routines-check-toggle input {
+  width: 17px;
+  height: 17px;
+  accent-color: #fff;
+}
+
 .routines-days-card,
 .routines-devices-card,
 .routines-preview {

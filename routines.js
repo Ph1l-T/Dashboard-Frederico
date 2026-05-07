@@ -216,6 +216,13 @@
       .join(", ");
   }
 
+  function formatRoutineSchedule(routine) {
+    const parts = [];
+    if (routine.onTime) parts.push(`Liga ${routine.onTime}`);
+    if (routine.offTime) parts.push(`Desliga ${routine.offTime}`);
+    return parts.length ? parts.join(" | ") : "Sem horário";
+  }
+
   function renderRoutineCard(routine) {
     const deviceLabel = formatRoutineDeviceSummary(routine);
     return `
@@ -225,7 +232,7 @@
             <h3 class="routine-card__name">${escapeHtml(routine.name)}</h3>
             <p class="routine-card__meta">${escapeHtml(deviceLabel)}</p>
             <p class="routine-card__schedule">
-              Liga ${escapeHtml(routine.onTime || "--:--")} · Desliga ${escapeHtml(routine.offTime || "--:--")}<br>
+              ${escapeHtml(formatRoutineSchedule(routine))}<br>
               ${escapeHtml(formatDays(routine.days))}
             </p>
           </div>
@@ -237,12 +244,16 @@
           <button type="button" class="routines-btn routines-btn--secondary" data-routine-action="edit">
             Editar
           </button>
-          <button type="button" class="routines-btn routines-btn--ghost" data-routine-action="run-on">
-            Ligar agora
-          </button>
-          <button type="button" class="routines-btn routines-btn--ghost" data-routine-action="run-off">
-            Desligar agora
-          </button>
+          ${routine.onRule ? `
+            <button type="button" class="routines-btn routines-btn--ghost" data-routine-action="run-on">
+              Ligar agora
+            </button>
+          ` : ""}
+          ${routine.offRule ? `
+            <button type="button" class="routines-btn routines-btn--ghost" data-routine-action="run-off">
+              Desligar agora
+            </button>
+          ` : ""}
           <button type="button" class="routines-btn routines-btn--secondary" data-routine-action="${routine.enabled ? "disable" : "enable"}">
             ${routine.enabled ? "Pausar" : "Ativar"}
           </button>
@@ -380,6 +391,26 @@
       });
   }
 
+  function routineActionEnabled(action) {
+    const checkbox = byId(action === "on" ? "routine-on-enabled" : "routine-off-enabled");
+    return checkbox ? checkbox.checked === true : true;
+  }
+
+  function setRoutineActionEnabled(action, enabled) {
+    const checkbox = byId(action === "on" ? "routine-on-enabled" : "routine-off-enabled");
+    const input = byId(action === "on" ? "routine-on-time" : "routine-off-time");
+    const field = document.querySelector(`[data-routine-action-field="${action}"]`);
+
+    if (checkbox) checkbox.checked = enabled;
+    if (input) input.disabled = !enabled;
+    if (field) field.classList.toggle("is-disabled", !enabled);
+  }
+
+  function updateRoutineActionFields() {
+    setRoutineActionEnabled("on", routineActionEnabled("on"));
+    setRoutineActionEnabled("off", routineActionEnabled("off"));
+  }
+
   function updatePreview() {
     const preview = byId("routine-preview");
     if (!preview) return;
@@ -388,13 +419,25 @@
     const deviceLabel = deviceIds.length
       ? formatDeviceLabels(deviceIds)
       : "dispositivos selecionados";
+    const onEnabled = routineActionEnabled("on");
+    const offEnabled = routineActionEnabled("off");
     const onTime = normalizeTime(byId("routine-on-time")?.value) || "--:--";
     const offTime = normalizeTime(byId("routine-off-time")?.value) || "--:--";
     const days = selectedDays();
+    const lines = [];
+
+    if (onEnabled) {
+      lines.push(`Quando for <strong>${escapeHtml(onTime)}</strong>, a Hubitat vai ligar <strong>${escapeHtml(deviceLabel)}</strong>.`);
+    }
+    if (offEnabled) {
+      lines.push(`Quando for <strong>${escapeHtml(offTime)}</strong>, a Hubitat vai desligar <strong>${escapeHtml(deviceLabel)}</strong>.`);
+    }
+    if (!lines.length) {
+      lines.push("Ative pelo menos uma ação para salvar a rotina.");
+    }
 
     preview.innerHTML = `
-      Quando for <strong>${escapeHtml(onTime)}</strong>, a Hubitat vai ligar <strong>${escapeHtml(deviceLabel)}</strong>.<br>
-      Quando for <strong>${escapeHtml(offTime)}</strong>, a Hubitat vai desligar os mesmos dispositivos.<br>
+      ${lines.join("<br>")}<br>
       <span>${escapeHtml(formatDays(days))}</span>
     `;
   }
@@ -457,6 +500,8 @@
   function buildRoutineRules(existingRoutine = null) {
     const name = String(byId("routine-name-input")?.value || "").trim();
     const deviceIds = selectedDeviceIds();
+    const onEnabled = routineActionEnabled("on");
+    const offEnabled = routineActionEnabled("off");
     const onTime = normalizeTime(byId("routine-on-time")?.value);
     const offTime = normalizeTime(byId("routine-off-time")?.value);
     const days = selectedDays();
@@ -466,8 +511,12 @@
     if (deviceIds.length > MAX_ROUTINE_DEVICES) {
       throw new Error(`Selecione ate ${MAX_ROUTINE_DEVICES} dispositivos por rotina.`);
     }
-    if (!onTime || !offTime) throw new Error("Informe horarios validos.");
-    if (onTime === offTime) throw new Error("Os horarios de ligar e desligar precisam ser diferentes.");
+    if (!onEnabled && !offEnabled) throw new Error("Ative ao menos uma ação da rotina.");
+    if (onEnabled && !onTime) throw new Error("Informe um horário válido para ligar.");
+    if (offEnabled && !offTime) throw new Error("Informe um horário válido para desligar.");
+    if (onEnabled && offEnabled && onTime === offTime) {
+      throw new Error("Os horários de ligar e desligar precisam ser diferentes.");
+    }
     if (!days.length) throw new Error("Selecione ao menos um dia.");
 
     const routineId = existingRoutine?.id || makeId("routine");
@@ -479,8 +528,10 @@
       conditions: [],
     };
 
-    return [
-      {
+    const rules = [];
+
+    if (onEnabled) {
+      rules.push({
         ...base,
         id: existingRoutine?.onRule?.id || `${routineId}_on`,
         name: `${name} - ligar`,
@@ -491,8 +542,11 @@
           command: "on",
           args: [],
         })),
-      },
-      {
+      });
+    }
+
+    if (offEnabled) {
+      rules.push({
         ...base,
         id: existingRoutine?.offRule?.id || `${routineId}_off`,
         name: `${name} - desligar`,
@@ -503,8 +557,10 @@
           command: "off",
           args: [],
         })),
-      },
-    ];
+      });
+    }
+
+    return rules;
   }
 
   async function saveRoutine() {
@@ -519,6 +575,7 @@
       }
 
       const rules = buildRoutineRules(existingRoutine);
+      const desiredRuleIds = new Set(rules.map((rule) => rule.id));
       if (saveBtn) saveBtn.disabled = true;
       setFeedback(
         editMode ? "Atualizando rotina na Hubitat..." : "Salvando rotina na Hubitat...",
@@ -536,6 +593,15 @@
           const saved = await api("/rules", { method: "POST", body: rule });
           created.push(saved);
         }
+      }
+
+      if (editMode) {
+        const staleRules = [existingRoutine.onRule, existingRoutine.offRule]
+          .filter((rule) => rule?.id)
+          .filter((rule) => !desiredRuleIds.has(rule.id));
+        await Promise.all(
+          staleRules.map((rule) => api(`/rules/${rule.id}`, { method: "DELETE" })),
+        );
       }
 
       if (editMode) {
@@ -660,6 +726,8 @@
     if (nameInput) nameInput.value = routine.name || "";
     if (onInput) onInput.value = routine.onTime || "23:00";
     if (offInput) offInput.value = routine.offTime || "06:00";
+    setRoutineActionEnabled("on", Boolean(routine.onTime || routine.onRule));
+    setRoutineActionEnabled("off", Boolean(routine.offTime || routine.offRule));
     setSelectedDays(routine.days);
     setSelectedDeviceIds(routine.deviceIds || [routine.deviceId]);
     updatePreview();
@@ -735,6 +803,15 @@
     const saveBtn = byId("routine-save-btn");
     if (saveBtn) saveBtn.onclick = saveRoutine;
 
+    ["routine-on-enabled", "routine-off-enabled"].forEach((id) => {
+      const checkbox = byId(id);
+      if (!checkbox) return;
+      checkbox.onchange = () => {
+        updateRoutineActionFields();
+        updatePreview();
+      };
+    });
+
     const allBtn = byId("routine-days-all");
     if (allBtn) {
       allBtn.onclick = () => {
@@ -784,6 +861,7 @@
       if (el) el.onchange = updatePreview;
     });
 
+    updateRoutineActionFields();
     updatePreview();
   }
 
