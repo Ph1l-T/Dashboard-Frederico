@@ -36,7 +36,7 @@
     <link rel="preload" href="styles.css?v=1.0.41" as="style" />
     <link rel="stylesheet" href="styles.css?v=1.0.41" />
     <link rel="stylesheet" href="main-home.css?v=1.0.0" />
-    <link rel="stylesheet" href="routines.css?v=1.0.5" />
+    <link rel="stylesheet" href="routines.css?v=1.0.13" />
     <script src="config.js?v=1.0.21"></script>
     <link rel="icon" href="images/pwa/app-icon-192.png" type="image/png" />
     <link rel="manifest" href="manifest.json" />
@@ -1006,6 +1006,15 @@
         }
       }
 
+      window.notifyBottomNavScroll = function notifyBottomNavScroll(source) {
+        const normalizedSource = resolveBottomNavScrollSource(source);
+        syncBottomNavScrollState(
+          getBottomNavConfigSafe(),
+          normalizedSource,
+          getBottomNavSourceScrollY(normalizedSource),
+        );
+      };
+
       function onBottomNavAnyScroll(event) {
         bottomNavPendingScrollSource = resolveBottomNavScrollSource(
           event?.target,
@@ -1814,7 +1823,7 @@
         if (routinesScriptPromise) return routinesScriptPromise;
         routinesScriptPromise = new Promise((resolve, reject) => {
           const script = document.createElement("script");
-          script.src = "routines.js?v=1.0.4";
+          script.src = "routines.js?v=1.0.9";
           script.async = true;
           script.onload = resolve;
           script.onerror = () =>
@@ -4006,8 +4015,7 @@
                     <div class="routines-shell routines-shell--builder">
                         <section class="routines-builder-panel">
                             <div class="routines-builder-head">
-                                <span class="routines-kicker">Agenda</span>
-                                <h2 class="routines-title">Ligar ou desligar por horário</h2>
+                                <h2 class="routines-title">Rotinas</h2>
                                 <p class="routines-subtitle">Escolha os dispositivos, as ações, os horários e os dias da semana.</p>
                             </div>
 
@@ -4018,8 +4026,11 @@
                                 </label>
 
                                 <div class="routines-devices-card routines-field--wide">
-                                    <div class="routines-days-head">
-                                        <span>Dispositivos</span>
+                                    <div class="routines-days-head routines-days-head--stacked">
+                                        <div>
+                                            <span>Dispositivos</span>
+                                            <span id="routine-devices-selected-count" class="routines-selection-count">Nenhum selecionado</span>
+                                        </div>
                                         <div class="routines-inline-actions">
                                             <button type="button" id="routine-devices-all" class="routines-btn routines-btn--ghost">Todos</button>
                                             <button type="button" id="routine-devices-clear" class="routines-btn routines-btn--ghost">Limpar</button>
@@ -4038,7 +4049,7 @@
                                             <span>Ativo</span>
                                         </label>
                                     </div>
-                                    <input id="routine-on-time" class="routines-input" type="time" value="23:00" />
+                                    <input id="routine-on-time" class="routines-input routines-time-input" type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="23:00" value="23:00" />
                                 </div>
 
                                 <div class="routines-field routines-action-field" data-routine-action-field="off">
@@ -4049,7 +4060,7 @@
                                             <span>Ativo</span>
                                         </label>
                                     </div>
-                                    <input id="routine-off-time" class="routines-input" type="time" value="06:00" />
+                                    <input id="routine-off-time" class="routines-input routines-time-input" type="text" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="06:00" value="06:00" />
                                 </div>
                             </div>
 
@@ -4071,8 +4082,10 @@
 
                             <div class="routines-preview" id="routine-preview"></div>
 
+                            <div id="routine-save-summary" class="routines-save-summary" aria-live="polite"></div>
+
                             <div class="routines-actions">
-                                <button type="button" id="routine-save-btn" class="routines-btn routines-btn--primary">${isEdit ? "Salvar alteracoes" : "Salvar na Hubitat"}</button>
+                                <button type="button" id="routine-save-btn" class="routines-btn routines-btn--primary">${isEdit ? "Salvar alterações" : "Salvar na Hubitat"}</button>
                                 <button type="button" id="routine-back-btn" class="routines-btn routines-btn--secondary">Voltar</button>
                             </div>
 

@@ -12,7 +12,7 @@
     wed: "Qua",
     thu: "Qui",
     fri: "Sex",
-    sat: "Sab",
+    sat: "Sáb",
     sun: "Dom",
   };
   const DAY_ORDER = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
@@ -45,13 +45,40 @@
 
   function normalizeTime(value) {
     const raw = String(value || "").trim();
-    return /^([01]\d|2[0-3]):([0-5]\d)$/.test(raw) ? raw : "";
+    const colonMatch = raw.match(/^(\d{1,2}):([0-5]\d)$/);
+    if (colonMatch) {
+      const hour = Number(colonMatch[1]);
+      if (hour >= 0 && hour <= 23) {
+        return `${String(hour).padStart(2, "0")}:${colonMatch[2]}`;
+      }
+      return "";
+    }
+
+    const digits = raw.replace(/\D/g, "");
+    if (digits.length === 3 || digits.length === 4) {
+      const hourText = digits.slice(0, digits.length - 2);
+      const minuteText = digits.slice(-2);
+      const hour = Number(hourText);
+      const minute = Number(minuteText);
+      if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+        return `${String(hour).padStart(2, "0")}:${minuteText}`;
+      }
+    }
+
+    return "";
+  }
+
+  function sanitizeTimeText(value) {
+    return String(value || "")
+      .replace(/[^\d:]/g, "")
+      .slice(0, 5);
   }
 
   function setFeedback(message, type) {
     const el = byId("routines-feedback");
     if (!el) return;
-    el.textContent = message || "";
+    const normalized = String(message || "").trim();
+    el.textContent = /^HTTP\s+\d{3}$/i.test(normalized) ? "" : normalized;
     el.dataset.state = type || "neutral";
   }
 
@@ -223,8 +250,26 @@
     return parts.length ? parts.join(" | ") : "Sem horário";
   }
 
+  function actionButtonHtml(action, label, icon, variant = "ghost") {
+    return `
+      <button type="button" class="routines-btn routines-btn--${variant}" data-routine-action="${escapeHtml(action)}" aria-label="${escapeHtml(label)}">
+        <img class="routines-btn__icon" src="${escapeHtml(icon)}" alt="" aria-hidden="true">
+        <span class="routines-btn__label">${escapeHtml(label)}</span>
+      </button>
+    `;
+  }
+
   function renderRoutineCard(routine) {
     const deviceLabel = formatRoutineDeviceSummary(routine);
+    const runButtons = [
+      routine.onRule
+        ? actionButtonHtml("run-on", "Ligar agora", "images/icons/icon-small-light-on.svg")
+        : "",
+      routine.offRule
+        ? actionButtonHtml("run-off", "Desligar agora", "images/icons/icon-small-light-off.svg")
+        : "",
+    ].filter(Boolean).join("");
+
     return `
       <article class="routine-card" data-routine-id="${escapeHtml(routine.id)}">
         <div class="routine-card__top">
@@ -241,25 +286,12 @@
           </span>
         </div>
         <div class="routine-card__actions">
-          <button type="button" class="routines-btn routines-btn--secondary" data-routine-action="edit">
-            Editar
-          </button>
-          ${routine.onRule ? `
-            <button type="button" class="routines-btn routines-btn--ghost" data-routine-action="run-on">
-              Ligar agora
-            </button>
-          ` : ""}
-          ${routine.offRule ? `
-            <button type="button" class="routines-btn routines-btn--ghost" data-routine-action="run-off">
-              Desligar agora
-            </button>
-          ` : ""}
-          <button type="button" class="routines-btn routines-btn--secondary" data-routine-action="${routine.enabled ? "disable" : "enable"}">
-            ${routine.enabled ? "Pausar" : "Ativar"}
-          </button>
-          <button type="button" class="routines-btn routines-btn--ghost" data-routine-action="delete">
-            Excluir
-          </button>
+          ${runButtons ? `<div class="routine-card__action-group routine-card__action-group--run">${runButtons}</div>` : ""}
+          <div class="routine-card__action-group routine-card__action-group--manage">
+            ${actionButtonHtml("edit", "Editar", "images/icons/icon-settings.svg", "secondary")}
+            ${actionButtonHtml(routine.enabled ? "disable" : "enable", routine.enabled ? "Pausar" : "Ativar", routine.enabled ? "images/icons/icon-pause.svg" : "images/icons/icon-play.svg", "secondary")}
+            ${actionButtonHtml("delete", "Excluir", "images/icons/icon-limpar.svg", "danger")}
+          </div>
         </div>
       </article>
     `;
@@ -301,6 +333,21 @@
       .filter(Boolean);
   }
 
+  function setDeviceButtonSelected(button, selected) {
+    if (!button) return;
+    button.classList.toggle("is-selected", selected);
+    button.setAttribute("aria-pressed", selected ? "true" : "false");
+  }
+
+  function setDeviceSelectionById(deviceId, selected) {
+    const id = String(deviceId || "").trim();
+    document.querySelectorAll(".routine-device").forEach((button) => {
+      if (String(button.dataset.deviceId || "").trim() === id) {
+        setDeviceButtonSelected(button, selected);
+      }
+    });
+  }
+
   function setSelectedDeviceIds(deviceIds) {
     const selected = new Set(
       (Array.isArray(deviceIds) ? deviceIds : [deviceIds])
@@ -310,9 +357,9 @@
 
     document.querySelectorAll(".routine-device").forEach((button) => {
       const isSelected = selected.has(String(button.dataset.deviceId || "").trim());
-      button.classList.toggle("is-selected", isSelected);
-      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
+      setDeviceButtonSelected(button, isSelected);
     });
+    updateSelectedDeviceUi();
   }
 
   function setSelectedDays(days) {
@@ -342,6 +389,75 @@
     const label = formatDeviceLabels(ids);
     if (ids.length <= 1) return label;
     return `${label} (${ids.length} dispositivos)`;
+  }
+
+  function formatDeviceCount(count) {
+    return `${count} dispositivo${count === 1 ? "" : "s"}`;
+  }
+
+  function renderSelectedDeviceChips(deviceIds) {
+    const container = byId("routine-selected-devices");
+    if (!container) return;
+
+    if (!deviceIds.length) {
+      container.hidden = true;
+      container.innerHTML = "";
+      return;
+    }
+
+    const visibleIds = deviceIds.slice(0, 12);
+    const extraCount = deviceIds.length - visibleIds.length;
+    const chips = visibleIds.map((id) => {
+      const label = getDeviceLabel(id);
+      return `
+        <button
+          type="button"
+          class="routines-selected-chip"
+          data-remove-device-id="${escapeHtml(id)}"
+          aria-label="Remover ${escapeHtml(label)}"
+        >
+          <span>${escapeHtml(label)}</span>
+          <span aria-hidden="true">&times;</span>
+        </button>
+      `;
+    });
+
+    if (extraCount > 0) {
+      chips.push(`<span class="routines-selected-chip routines-selected-chip--more">+${extraCount}</span>`);
+    }
+
+    container.hidden = false;
+    container.innerHTML = `
+      <span class="routines-selected-devices__label">Selecionados</span>
+      ${chips.join("")}
+    `;
+
+    container.querySelectorAll("[data-remove-device-id]").forEach((button) => {
+      button.onclick = () => {
+        setDeviceSelectionById(button.dataset.removeDeviceId, false);
+        updatePreview();
+      };
+    });
+  }
+
+  function updateSaveSummary(deviceIds, days, onEnabled, offEnabled, onTime, offTime) {
+    const summary = byId("routine-save-summary");
+    if (!summary) return;
+
+    const activeActions = [];
+    if (onEnabled) activeActions.push(`Liga ${onTime}`);
+    if (offEnabled) activeActions.push(`Desliga ${offTime}`);
+
+    const items = [
+      formatDeviceCount(deviceIds.length),
+      ...(activeActions.length ? activeActions : ["Nenhuma ação ativa"]),
+      formatDays(days),
+    ];
+
+    summary.dataset.state = activeActions.length ? "ready" : "warning";
+    summary.innerHTML = items
+      .map((item) => `<span class="routines-save-summary__item">${escapeHtml(item)}</span>`)
+      .join("");
   }
 
   function normalizeRoomName(device) {
@@ -406,14 +522,53 @@
     if (field) field.classList.toggle("is-disabled", !enabled);
   }
 
+  function updateActionEmptyState(onEnabled = routineActionEnabled("on"), offEnabled = routineActionEnabled("off")) {
+    const hasAction = onEnabled || offEnabled;
+    const panel = document.querySelector(".routines-builder-panel");
+    if (panel) panel.classList.toggle("has-no-active-action", !hasAction);
+    document.querySelectorAll(".routines-action-field").forEach((field) => {
+      field.classList.toggle("needs-action", !hasAction);
+    });
+  }
+
   function updateRoutineActionFields() {
     setRoutineActionEnabled("on", routineActionEnabled("on"));
     setRoutineActionEnabled("off", routineActionEnabled("off"));
+    updateActionEmptyState();
+  }
+
+  function updateSelectedDeviceUi() {
+    const deviceIds = selectedDeviceIds();
+    const selectedCount = deviceIds.length;
+    const summary = byId("routine-devices-selected-count");
+    if (summary) {
+      summary.textContent = selectedCount
+        ? `${selectedCount} selecionado${selectedCount === 1 ? "" : "s"}`
+        : "Nenhum selecionado";
+    }
+    renderSelectedDeviceChips(deviceIds);
+
+    document.querySelectorAll(".routine-room-tab").forEach((tab) => {
+      const roomKey = tab.dataset.roomKey;
+      const panel = document.querySelector(`.routine-room-panel[data-room-key="${roomKey}"]`);
+      const buttons = Array.from(panel?.querySelectorAll(".routine-device") || []);
+      const roomSelectedCount = buttons.filter((button) =>
+        button.classList.contains("is-selected"),
+      ).length;
+      const count = tab.querySelector(".routine-room-tab__count");
+      if (count) {
+        count.textContent = roomSelectedCount
+          ? `${roomSelectedCount}/${buttons.length}`
+          : `${buttons.length}`;
+      }
+      tab.classList.toggle("has-selection", roomSelectedCount > 0);
+    });
   }
 
   function updatePreview() {
     const preview = byId("routine-preview");
     if (!preview) return;
+    updateSelectedDeviceUi();
 
     const deviceIds = selectedDeviceIds();
     const deviceLabel = deviceIds.length
@@ -425,6 +580,7 @@
     const offTime = normalizeTime(byId("routine-off-time")?.value) || "--:--";
     const days = selectedDays();
     const lines = [];
+    updateActionEmptyState(onEnabled, offEnabled);
 
     if (onEnabled) {
       lines.push(`Quando for <strong>${escapeHtml(onTime)}</strong>, a Hubitat vai ligar <strong>${escapeHtml(deviceLabel)}</strong>.`);
@@ -440,6 +596,7 @@
       ${lines.join("<br>")}<br>
       <span>${escapeHtml(formatDays(days))}</span>
     `;
+    updateSaveSummary(deviceIds, days, onEnabled, offEnabled, onTime, offTime);
   }
 
   function populateDeviceSelect() {
@@ -474,10 +631,18 @@
           )
           .join("")}
       </div>
+      <div id="routine-selected-devices" class="routines-selected-devices" hidden></div>
       ${groups
         .map(
           (group) => `
             <div class="routine-room-panel${group.key === activeKey ? " is-active" : ""}" data-room-key="${escapeHtml(group.key)}" role="tabpanel">
+              <div class="routine-room-panel__head">
+                <span>${group.devices.length} dispositivo${group.devices.length === 1 ? "" : "s"}</span>
+                <div class="routines-inline-actions">
+                  <button type="button" class="routines-btn routines-btn--ghost" data-room-device-action="select" data-room-key="${escapeHtml(group.key)}">Selecionar ambiente</button>
+                  <button type="button" class="routines-btn routines-btn--ghost" data-room-device-action="clear" data-room-key="${escapeHtml(group.key)}">Limpar ambiente</button>
+                </div>
+              </div>
               <div class="routine-room-grid">
                 ${group.devices
                   .map((device) => {
@@ -715,7 +880,7 @@
     const title = byId("routine-page-title");
     const saveBtn = byId("routine-save-btn");
     if (title) title.textContent = editMode ? "Editar Rotina" : "Criar Rotina";
-    if (saveBtn) saveBtn.textContent = editMode ? "Salvar alteracoes" : "Salvar na Hubitat";
+    if (saveBtn) saveBtn.textContent = editMode ? "Salvar alterações" : "Salvar na Hubitat";
   }
 
   function applyRoutineToForm(routine) {
@@ -749,19 +914,68 @@
     });
   }
 
-  function bindRoutineDeviceButtons() {
-    document.querySelectorAll(".routine-device").forEach((button) => {
+  function bindRoutineRoomActions() {
+    document.querySelectorAll("[data-room-device-action]").forEach((button) => {
       button.onclick = () => {
-        const selected = !button.classList.contains("is-selected");
-        button.classList.toggle("is-selected", selected);
-        button.setAttribute("aria-pressed", selected ? "true" : "false");
+        const roomKey = button.dataset.roomKey;
+        const action = button.dataset.roomDeviceAction;
+        const panel = document.querySelector(`.routine-room-panel[data-room-key="${roomKey}"]`);
+        panel?.querySelectorAll(".routine-device").forEach((deviceButton) => {
+          const selected = action === "select";
+          setDeviceButtonSelected(deviceButton, selected);
+        });
         updatePreview();
       };
     });
   }
 
+  function bindRoutineDeviceButtons() {
+    document.querySelectorAll(".routine-device").forEach((button) => {
+      button.onclick = () => {
+        const selected = !button.classList.contains("is-selected");
+        setDeviceButtonSelected(button, selected);
+        updatePreview();
+      };
+    });
+  }
+
+  function bindTimeInput(id) {
+    const input = byId(id);
+    if (!input) return;
+
+    input.oninput = () => {
+      input.value = sanitizeTimeText(input.value);
+      updatePreview();
+    };
+
+    const normalizeInput = () => {
+      const normalized = normalizeTime(input.value);
+      if (normalized) input.value = normalized;
+      updatePreview();
+    };
+
+    input.onchange = normalizeInput;
+    input.onblur = normalizeInput;
+  }
+
+  function bindRoutineBuilderScroll() {
+    const shell = document.querySelector(".routines-builder-page .routines-shell--builder");
+    if (!shell || shell.dataset.routineScrollBound === "true") return;
+    shell.dataset.routineScrollBound = "true";
+    shell.addEventListener(
+      "scroll",
+      () => {
+        if (typeof global.notifyBottomNavScroll === "function") {
+          global.notifyBottomNavScroll(shell);
+        }
+      },
+      { passive: true },
+    );
+  }
+
   async function bindBuilderPage() {
     const editMode = isEditMode();
+    bindRoutineBuilderScroll();
     state.editingRoutineId = editMode
       ? String(global.sessionStorage?.getItem("routineEditId") || "").trim()
       : "";
@@ -777,6 +991,7 @@
       await Promise.all([loadDevices(), editMode ? loadRules() : Promise.resolve()]);
       populateDeviceSelect();
       bindRoutineRoomTabs();
+      bindRoutineRoomActions();
       bindRoutineDeviceButtons();
       if (editMode) {
         const routine = getRoutineById(state.editingRoutineId);
@@ -789,6 +1004,7 @@
     } catch (error) {
       populateDeviceSelect();
       bindRoutineRoomTabs();
+      bindRoutineRoomActions();
       bindRoutineDeviceButtons();
       setFeedback(error?.message || "Falha ao carregar dispositivos.", "error");
       const saveBtn = byId("routine-save-btn");
@@ -826,8 +1042,7 @@
     if (allDevicesBtn) {
       allDevicesBtn.onclick = () => {
         document.querySelectorAll(".routine-device").forEach((button) => {
-          button.classList.add("is-selected");
-          button.setAttribute("aria-pressed", "true");
+          setDeviceButtonSelected(button, true);
         });
         updatePreview();
       };
@@ -837,8 +1052,7 @@
     if (clearDevicesBtn) {
       clearDevicesBtn.onclick = () => {
         document.querySelectorAll(".routine-device").forEach((button) => {
-          button.classList.remove("is-selected");
-          button.setAttribute("aria-pressed", "false");
+          setDeviceButtonSelected(button, false);
         });
         updatePreview();
       };
@@ -851,15 +1065,12 @@
       };
     });
 
-    [
-      "routine-name-input",
-      "routine-on-time",
-      "routine-off-time",
-    ].forEach((id) => {
-      const el = byId(id);
-      if (el) el.oninput = updatePreview;
-      if (el) el.onchange = updatePreview;
-    });
+    const nameInput = byId("routine-name-input");
+    if (nameInput) {
+      nameInput.oninput = updatePreview;
+      nameInput.onchange = updatePreview;
+    }
+    ["routine-on-time", "routine-off-time"].forEach(bindTimeInput);
 
     updateRoutineActionFields();
     updatePreview();
