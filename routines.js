@@ -5,6 +5,7 @@
   const API_URL = "/rule-engine-proxy";
   const ROUTINE_SOURCE = "dashboard-routine-v1";
   const MAX_ROUTINE_DEVICES = 200;
+  const ROOM_FALLBACK_LABEL = "Sem ambiente";
   const DAY_LABELS = {
     mon: "Seg",
     tue: "Ter",
@@ -332,6 +333,53 @@
     return `${label} (${ids.length} dispositivos)`;
   }
 
+  function normalizeRoomName(device) {
+    const roomName = String(device?.roomName || "").trim();
+    return roomName || ROOM_FALLBACK_LABEL;
+  }
+
+  function roomKeyForDevice(device) {
+    const roomId = String(device?.roomId || "").trim();
+    if (roomId) return `room-${roomId}`;
+
+    const roomName = normalizeRoomName(device);
+    const slug = roomName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/gi, "-")
+      .replace(/^-+|-+$/g, "");
+    return `room-${slug || "sem-ambiente"}`;
+  }
+
+  function groupedDevicesByRoom() {
+    const groups = new Map();
+
+    state.devices.forEach((device) => {
+      const roomName = normalizeRoomName(device);
+      const key = roomKeyForDevice(device);
+      if (!groups.has(key)) {
+        groups.set(key, {
+          key,
+          name: roomName,
+          devices: [],
+        });
+      }
+      groups.get(key).devices.push(device);
+    });
+
+    return Array.from(groups.values())
+      .map((group) => ({
+        ...group,
+        devices: group.devices.sort((a, b) =>
+          getDeviceLabel(a.id).localeCompare(getDeviceLabel(b.id), "pt-BR"),
+        ),
+      }))
+      .sort((a, b) => {
+        if (a.name === ROOM_FALLBACK_LABEL && b.name !== ROOM_FALLBACK_LABEL) return 1;
+        if (b.name === ROOM_FALLBACK_LABEL && a.name !== ROOM_FALLBACK_LABEL) return -1;
+        return a.name.localeCompare(b.name, "pt-BR");
+      });
+  }
+
   function updatePreview() {
     const preview = byId("routine-preview");
     if (!preview) return;
@@ -361,16 +409,49 @@
       return;
     }
 
-    list.innerHTML = state.devices
-      .map((device) => {
-        const label = device.label || device.name || device.id;
-        return `
-          <button type="button" class="routine-device" data-device-id="${escapeHtml(device.id)}" aria-pressed="false">
-            ${escapeHtml(label)}
-          </button>
-        `;
-      })
-      .join("");
+    const groups = groupedDevicesByRoom();
+    const activeKey = groups[0]?.key || "";
+
+    list.innerHTML = `
+      <div class="routine-room-tabs" role="tablist" aria-label="Ambientes">
+        ${groups
+          .map(
+            (group) => `
+              <button
+                type="button"
+                class="routine-room-tab${group.key === activeKey ? " is-active" : ""}"
+                data-room-key="${escapeHtml(group.key)}"
+                role="tab"
+                aria-selected="${group.key === activeKey ? "true" : "false"}"
+              >
+                <span>${escapeHtml(group.name)}</span>
+                <span class="routine-room-tab__count">${group.devices.length}</span>
+              </button>
+            `,
+          )
+          .join("")}
+      </div>
+      ${groups
+        .map(
+          (group) => `
+            <div class="routine-room-panel${group.key === activeKey ? " is-active" : ""}" data-room-key="${escapeHtml(group.key)}" role="tabpanel">
+              <div class="routine-room-grid">
+                ${group.devices
+                  .map((device) => {
+                    const label = device.label || device.name || device.id;
+                    return `
+                      <button type="button" class="routine-device" data-device-id="${escapeHtml(device.id)}" aria-pressed="false">
+                        ${escapeHtml(label)}
+                      </button>
+                    `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `,
+        )
+        .join("")}
+    `;
   }
 
   function buildRoutineRules(existingRoutine = null) {
@@ -584,6 +665,33 @@
     updatePreview();
   }
 
+  function bindRoutineRoomTabs() {
+    document.querySelectorAll(".routine-room-tab").forEach((tab) => {
+      tab.onclick = () => {
+        const roomKey = tab.dataset.roomKey;
+        document.querySelectorAll(".routine-room-tab").forEach((item) => {
+          const active = item.dataset.roomKey === roomKey;
+          item.classList.toggle("is-active", active);
+          item.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        document.querySelectorAll(".routine-room-panel").forEach((panel) => {
+          panel.classList.toggle("is-active", panel.dataset.roomKey === roomKey);
+        });
+      };
+    });
+  }
+
+  function bindRoutineDeviceButtons() {
+    document.querySelectorAll(".routine-device").forEach((button) => {
+      button.onclick = () => {
+        const selected = !button.classList.contains("is-selected");
+        button.classList.toggle("is-selected", selected);
+        button.setAttribute("aria-pressed", selected ? "true" : "false");
+        updatePreview();
+      };
+    });
+  }
+
   async function bindBuilderPage() {
     const editMode = isEditMode();
     state.editingRoutineId = editMode
@@ -600,6 +708,8 @@
     try {
       await Promise.all([loadDevices(), editMode ? loadRules() : Promise.resolve()]);
       populateDeviceSelect();
+      bindRoutineRoomTabs();
+      bindRoutineDeviceButtons();
       if (editMode) {
         const routine = getRoutineById(state.editingRoutineId);
         if (!state.editingRoutineId || !routine) {
@@ -610,6 +720,8 @@
       setFeedback("", "neutral");
     } catch (error) {
       populateDeviceSelect();
+      bindRoutineRoomTabs();
+      bindRoutineDeviceButtons();
       setFeedback(error?.message || "Falha ao carregar dispositivos.", "error");
       const saveBtn = byId("routine-save-btn");
       if (editMode && saveBtn) saveBtn.disabled = true;
@@ -654,15 +766,6 @@
         updatePreview();
       };
     }
-
-    document.querySelectorAll(".routine-device").forEach((button) => {
-      button.onclick = () => {
-        const selected = !button.classList.contains("is-selected");
-        button.classList.toggle("is-selected", selected);
-        button.setAttribute("aria-pressed", selected ? "true" : "false");
-        updatePreview();
-      };
-    });
 
     document.querySelectorAll(".routine-day").forEach((button) => {
       button.onclick = () => {

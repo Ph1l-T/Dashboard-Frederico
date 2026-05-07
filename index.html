@@ -36,7 +36,7 @@
     <link rel="preload" href="styles.css?v=1.0.41" as="style" />
     <link rel="stylesheet" href="styles.css?v=1.0.41" />
     <link rel="stylesheet" href="main-home.css?v=1.0.0" />
-    <link rel="stylesheet" href="routines.css?v=1.0.3" />
+    <link rel="stylesheet" href="routines.css?v=1.0.4" />
     <script src="config.js?v=1.0.21"></script>
     <link rel="icon" href="images/pwa/app-icon-192.png" type="image/png" />
     <link rel="manifest" href="manifest.json" />
@@ -1814,7 +1814,7 @@
         if (routinesScriptPromise) return routinesScriptPromise;
         routinesScriptPromise = new Promise((resolve, reject) => {
           const script = document.createElement("script");
-          script.src = "routines.js?v=1.0.2";
+          script.src = "routines.js?v=1.0.3";
           script.async = true;
           script.onload = resolve;
           script.onerror = () =>

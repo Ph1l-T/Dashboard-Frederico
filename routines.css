@@ -367,6 +367,62 @@
 
 .routines-devices {
   display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.routine-room-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.routine-room-tab {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.routine-room-tab.is-active {
+  color: #101010;
+  background: #fff;
+}
+
+.routine-room-tab__count {
+  display: inline-grid;
+  min-width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 999px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 0.72rem;
+}
+
+.routine-room-tab.is-active .routine-room-tab__count {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.routine-room-panel {
+  display: none;
+}
+
+.routine-room-panel.is-active {
+  display: block;
+}
+
+.routine-room-grid {
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 8px;
 }
@@ -473,7 +529,7 @@
     padding: 12px;
   }
 
-  .routines-devices {
+  .routine-room-grid {
     grid-template-columns: 1fr;
   }
 
@@ -512,6 +568,11 @@
 
   .routines-inline-actions .routines-btn {
     flex: 1 1 0;
+  }
+
+  .routine-room-tab {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: space-between;
   }
 
   .routine-card__actions .routines-btn {

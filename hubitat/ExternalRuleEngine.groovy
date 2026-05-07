@@ -5,7 +5,7 @@ definition(
   name: "External Rule Engine",
   namespace: "eletrize",
   author: "Eletrize",
-  description: "Recebe regras externas em JSON, escuta eventos e executa automacoes locais.",
+  description: "Recebe regras externas em JSON, escuta eventos e executa automações locais.",
   category: "Convenience",
   iconUrl: "",
   iconX2Url: "",
@@ -37,19 +37,19 @@ def mainPage() {
     section("API") {
       paragraph "Depois de salvar, use a URL local: http://HUB_IP/apps/api/${app?.id ?: 'APP_ID'}/ping?access_token=${state.accessToken ?: 'ACCESS_TOKEN'}"
       paragraph "App ID: ${app?.id ?: 'salve o app para gerar'}"
-      paragraph "Access token: ${state.accessToken ?: 'sera criado ao salvar'}"
+      paragraph "Token de acesso: ${state.accessToken ?: 'será criado ao salvar'}"
     }
 
     section("Resumo") {
       def status = schedulerStatus()
       paragraph "Regras totais: ${status.ruleCount}"
-      paragraph "Regras com horario: ${status.timeRuleCount}"
-      paragraph "Agendador ativo: ${status.schedulerActive ? 'sim' : 'nao'}"
-      paragraph "Metodo do agendador: ${status.schedulerMethod ?: 'nenhum'}"
-      paragraph "Ultimo tick: ${status.lastTick ?: 'nunca'}"
-      paragraph "Ultimo disparo por horario: ${status.lastTimeTriggerMatch ?: 'nunca'}"
+      paragraph "Regras com horário: ${status.timeRuleCount}"
+      paragraph "Agendador ativo: ${status.schedulerActive ? 'sim' : 'não'}"
+      paragraph "Método do agendador: ${status.schedulerMethod ?: 'nenhum'}"
+      paragraph "Último tick: ${status.lastTick ?: 'nunca'}"
+      paragraph "Último disparo por horário: ${status.lastTimeTriggerMatch ?: 'nunca'}"
       if (status.lastSchedulerError) paragraph "Erro do agendador: ${status.lastSchedulerError}"
-      if (status.lastExecutionError) paragraph "Ultimo erro de acao: ${status.lastExecutionError}"
+      if (status.lastExecutionError) paragraph "Último erro de ação: ${status.lastExecutionError}"
     }
 
     section("Gerenciar regras") {
@@ -63,7 +63,7 @@ def mainPage() {
       href(
         name: "refreshScheduler",
         title: "Rearmar agendador",
-        description: "Recria o agendamento interno das regras por horario",
+        description: "Recria o agendamento interno das regras por horário",
         page: "schedulerRefreshPage"
       )
 
@@ -83,7 +83,7 @@ def mainPage() {
     section("Limites e logs") {
       input "enableInfoLogging", "bool", title: "Ativar logs informativos", defaultValue: true, required: false
       input "enableDebugLogging", "bool", title: "Ativar logs detalhados", defaultValue: false, required: false
-      input "enableSchedulerDebugLogging", "bool", title: "Ativar diagnostico do agendador", defaultValue: false, required: false
+      input "enableSchedulerDebugLogging", "bool", title: "Ativar diagnóstico do agendador", defaultValue: false, required: false
     }
   }
 }
@@ -113,12 +113,12 @@ mappings {
 }
 
 def installed() {
-  logInfo("installed")
+  logInfo("instalado")
   initialize()
 }
 
 def updated() {
-  logInfo("updated")
+  logInfo("atualizado")
   unsubscribe()
   initialize()
 }
@@ -132,9 +132,9 @@ def initialize() {
   if (!state.accessToken) {
     try {
       createAccessToken()
-      logInfo("access token created")
+      logInfo("token de acesso criado")
     } catch (Exception e) {
-      log.warn "Could not create access token. Enable OAuth for this app code. ${e.message}"
+      log.warn "Não foi possível criar o token de acesso. Ative o OAuth para este código de app. ${e.message}"
     }
   }
 
@@ -166,6 +166,8 @@ def apiDevices() {
         id: "${d.id}",
         label: d.displayName,
         name: d.name,
+        roomId: safeRoomId(d),
+        roomName: safeRoomName(d),
         capabilities: safeCapabilities(d),
         attributes: safeAttributes(d),
         commands: allowedCommandsForDevice(d)
@@ -184,7 +186,7 @@ def apiListRules() {
 def apiGetRule() {
   endpoint {
     def rule = getRulesMap()[ruleIdParam()]
-    if (!rule) return renderError(404, "Rule not found")
+    if (!rule) return renderError(404, "Regra não encontrada")
     renderJson(rule)
   }
 }
@@ -196,7 +198,7 @@ def apiCreateRule() {
 
     def rules = getRulesMap()
     if (rules.size() >= 100) {
-      throw new IllegalArgumentException("Rule limit reached")
+      throw new IllegalArgumentException("Limite de regras atingido")
     }
 
     def rule = normalizeRule(payload)
@@ -206,7 +208,7 @@ def apiCreateRule() {
     state.rules = rules
 
     rebuildSubscriptions()
-    logInfo("rule created: ${rule.name} (${rule.id})")
+    logInfo("regra criada: ${rule.name} (${rule.id})")
     renderJson(rule, 201)
   }
 }
@@ -216,7 +218,7 @@ def apiUpdateRule() {
     def rules = getRulesMap()
     def ruleId = ruleIdParam()
     def existing = rules[ruleId]
-    if (!existing) return renderError(404, "Rule not found")
+    if (!existing) return renderError(404, "Regra não encontrada")
 
     def payload = readJsonBody()
     rejectOversizedPayload(payload)
@@ -229,7 +231,7 @@ def apiUpdateRule() {
     cancelExecutionsForRule(rule.id)
 
     rebuildSubscriptions()
-    logInfo("rule updated: ${rule.name} (${rule.id})")
+    logInfo("regra atualizada: ${rule.name} (${rule.id})")
     renderJson(rule)
   }
 }
@@ -238,14 +240,14 @@ def apiDeleteRule() {
   endpoint {
     def ruleId = ruleIdParam()
     def rules = getRulesMap()
-    if (!rules[ruleId]) return renderError(404, "Rule not found")
+    if (!rules[ruleId]) return renderError(404, "Regra não encontrada")
 
     rules.remove(ruleId)
     state.rules = rules
     cancelExecutionsForRule(ruleId)
     rebuildSubscriptions()
 
-    logInfo("rule deleted: ${ruleId}")
+    logInfo("regra removida: ${ruleId}")
     renderJson([ok: true])
   }
 }
@@ -265,17 +267,17 @@ def apiDisableRule() {
 def apiRunRule() {
   endpoint {
     def rule = getRulesMap()[ruleIdParam()]
-    if (!rule) return renderError(404, "Rule not found")
+    if (!rule) return renderError(404, "Regra não encontrada")
 
     runRule(rule, [manual: true])
-    renderJson([ok: true, message: "Rule execution started"])
+    renderJson([ok: true, message: "Execução da regra iniciada"])
   }
 }
 
 private def setRuleEnabled(String ruleId, Boolean enabled) {
   def rules = getRulesMap()
   def rule = rules[ruleId]
-  if (!rule) return renderError(404, "Rule not found")
+  if (!rule) return renderError(404, "Regra não encontrada")
 
   rule.enabled = enabled
   rule.updatedAt = isoNow()
@@ -306,7 +308,7 @@ def rebuildSubscriptions() {
           if (!subscribed.contains(key)) {
             subscribed.add(key)
             subscribe(device, attribute, deviceEventHandler)
-            logDebug("subscribed ${device.displayName}.${attribute}")
+            logDebug("inscrito em ${device.displayName}.${attribute}")
           }
         }
       } else if (trigger.type == "time") {
@@ -322,12 +324,12 @@ def rebuildSubscriptions() {
     state.schedulerMethod = "cron-second-zero"
     state.schedulerStartedAt = isoNow()
     state.lastSchedulerError = null
-    logInfo("time trigger scheduler active (${timeTriggerCount} gatilhos)")
+    logInfo("agendador de gatilhos por horário ativo (${timeTriggerCount} gatilhos)")
   } else {
     state.schedulerActive = false
     state.schedulerMethod = null
     state.schedulerStartedAt = null
-    logInfo("no time triggers; scheduler inactive")
+    logInfo("sem gatilhos por horário; agendador inativo")
   }
 }
 
@@ -336,7 +338,7 @@ def deviceEventHandler(evt) {
   def eventName = "${evt?.name ?: ""}"
   def eventValue = evt?.value
 
-  logInfo("event received: ${eventDeviceId}.${eventName}=${eventValue}")
+  logInfo("evento recebido: ${eventDeviceId}.${eventName}=${eventValue}")
 
   def matchingRules = getRulesMap().values().findAll { rule ->
     ruleEnabled(rule) && ruleMatchesEvent(rule, eventDeviceId, eventName, eventValue)
@@ -351,7 +353,7 @@ def continueRuleExecution(data) {
   def executionId = data?.executionId
   if (!executionId) return
 
-  logInfo("delay resumed: ${executionId}")
+  logInfo("atraso retomado: ${executionId}")
   executeNextAction("${executionId}")
 }
 
@@ -375,7 +377,7 @@ def scheduledTimeTick() {
       at: isoNow()
     ]
     state.lastSchedulerError = null
-    logSchedulerDebug("time tick ${currentMinute.time} (${currentMinute.day})")
+    logSchedulerDebug("tick de horário ${currentMinute.time} (${currentMinute.day})")
 
     getRulesMap().values().findAll { ruleEnabled(it) }.each { rule ->
       (rule.triggers ?: []).eachWithIndex { trigger, index ->
@@ -383,7 +385,7 @@ def scheduledTimeTick() {
           def triggerTime = normalizeTimeOfDay(trigger?.time)
           def triggerDays = normalizeTriggerDays(trigger?.days)
           Boolean matches = timeTriggerMatches(trigger, currentMinute)
-          logSchedulerDebug("time trigger check: ${rule.name} trigger=${triggerTime ?: trigger?.time} days=${triggerDays ?: 'todos'} current=${currentMinute.time}/${currentMinute.day} previous=${currentMinute.previousTime}/${currentMinute.previousDay} match=${matches}")
+          logSchedulerDebug("verificação de gatilho por horário: ${rule.name} gatilho=${triggerTime ?: trigger?.time} dias=${triggerDays ?: 'todos'} atual=${currentMinute.time}/${currentMinute.day} anterior=${currentMinute.previousTime}/${currentMinute.previousDay} corresponde=${matches}")
 
           if (matches) {
             Boolean previousMinuteMatch = triggerTime == normalizeTimeOfDay(currentMinute.previousTime)
@@ -394,7 +396,7 @@ def scheduledTimeTick() {
             def firedKey = "${rule.id}:${index}:${matchedKey}"
             def fired = state.timeTriggerFired instanceof Map ? state.timeTriggerFired : [:]
             if (fired[firedKey]) {
-              logSchedulerDebug("time trigger already fired: ${firedKey}")
+              logSchedulerDebug("gatilho por horário já disparado: ${firedKey}")
             } else {
               fired[firedKey] = now()
               state.timeTriggerFired = fired
@@ -406,7 +408,7 @@ def scheduledTimeTick() {
                 at: isoNow()
               ]
 
-              logInfo("time trigger fired: ${rule.name} (${matchedTime})")
+              logInfo("gatilho por horário disparado: ${rule.name} (${matchedTime})")
               runRule(rule, [
                 time: [
                   triggerIndex: index,
@@ -422,18 +424,18 @@ def scheduledTimeTick() {
     }
   } catch (Exception e) {
     state.lastSchedulerError = "${isoNow()} - ${e.message}"
-    log.warn "scheduledTimeTick failed: ${e.message}"
+    log.warn "Falha no tick agendado: ${e.message}"
   }
 }
 
 private void runRule(Map rule, Map context = [:]) {
   if (!allowExecutionNow(rule.id)) {
-    log.warn "Rate limit reached for ${rule.id}"
+    log.warn "Limite de execução atingido para ${rule.id}"
     return
   }
 
   if (!conditionsPass(rule.conditions ?: [])) {
-    logInfo("conditions failed: ${rule.name}")
+    logInfo("condições não atendidas: ${rule.name}")
     return
   }
 
@@ -448,7 +450,7 @@ private void runRule(Map rule, Map context = [:]) {
   ]
   state.executions = executions
 
-  logInfo("rule started: ${rule.name} (${executionId})")
+  logInfo("regra iniciada: ${rule.name} (${executionId})")
   executeNextAction(executionId)
 }
 
@@ -460,7 +462,7 @@ private Boolean conditionsPass(List conditions) {
     def attribute = "${condition.attribute ?: ""}".trim()
     def current = device.currentValue(attribute)
     def ok = compareValues(current, condition.operator ?: "eq", condition.value)
-    logDebug("condition ${device.displayName}.${attribute}: ${current} ${condition.operator} ${condition.value} => ${ok}")
+    logDebug("condição ${device.displayName}.${attribute}: ${current} ${condition.operator} ${condition.value} => ${ok}")
     return ok
   }
 }
@@ -476,7 +478,7 @@ private void executeNextAction(String executionId) {
 
     if (index >= actions.size()) {
       Integer errorCount = countExecutionActionErrors(executionId)
-      logInfo(errorCount > 0 ? "execution completed with ${errorCount} action error(s): ${executionId}" : "execution completed: ${executionId}")
+      logInfo(errorCount > 0 ? "execução concluída com ${errorCount} erro(s) de ação: ${executionId}" : "execução concluída: ${executionId}")
       executions.remove(executionId)
       state.executions = executions
       return
@@ -489,7 +491,7 @@ private void executeNextAction(String executionId) {
 
     if (action.type == "delay") {
       Integer seconds = safeInt(action.seconds, 1)
-      logInfo("delay started: ${seconds}s (${executionId})")
+      logInfo("atraso iniciado: ${seconds}s (${executionId})")
       runIn(seconds, "continueRuleExecution", [data: [executionId: executionId], overwrite: false])
       return
     }
@@ -497,12 +499,12 @@ private void executeNextAction(String executionId) {
     try {
       executeDeviceCommand(action)
     } catch (Exception actionError) {
-      log.warn "Action failed ${executionId}: ${actionError.message}"
+      log.warn "Falha na ação ${executionId}: ${actionError.message}"
       recordExecutionActionError(executionId, action, actionError)
     }
     executeNextAction(executionId)
   } catch (Exception e) {
-    log.warn "Execution failed ${executionId}: ${e.message}"
+    log.warn "Falha na execução ${executionId}: ${e.message}"
     def executions = getExecutionsMap()
     executions.remove(executionId)
     state.executions = executions
@@ -524,7 +526,7 @@ private void recordExecutionActionError(String executionId, action, Exception er
     ruleId: execution.ruleId ?: "",
     deviceId: "${actionMap.deviceId ?: ""}",
     command: "${actionMap.command ?: ""}",
-    message: "${error?.message ?: "Unknown action error"}",
+    message: "${error?.message ?: "Erro de ação desconhecido"}",
     at: isoNow()
   ])
 
@@ -536,19 +538,19 @@ private void recordExecutionActionError(String executionId, action, Exception er
 
 private void executeDeviceCommand(action) {
   def device = findAllowedDevice(action.deviceId)
-  if (!device) throw new IllegalArgumentException("Unauthorized device ${action.deviceId}")
+  if (!device) throw new IllegalArgumentException("Dispositivo não autorizado: ${action.deviceId}")
 
   String command = "${action.command ?: ""}".trim()
   String mappedCommand = mapCommandForDevice(device, command)
   if (!isCommandAllowed(device, mappedCommand)) {
-    throw new IllegalArgumentException("Command not allowed: ${command}")
+    throw new IllegalArgumentException("Comando não permitido: ${command}")
   }
 
   List args = normalizeCommandArgs(mappedCommand, action.args instanceof List ? action.args : [])
   if (mappedCommand != command) {
-    logInfo("executing ${device.displayName}.${command} -> ${mappedCommand}(${args.join(', ')})")
+    logInfo("executando ${device.displayName}.${command} -> ${mappedCommand}(${args.join(', ')})")
   } else {
-    logInfo("executing ${device.displayName}.${command}(${args.join(', ')})")
+    logInfo("executando ${device.displayName}.${command}(${args.join(', ')})")
   }
 
   if (args.isEmpty()) {
@@ -560,7 +562,7 @@ private void executeDeviceCommand(action) {
 
 private Map normalizeRule(payload, String forcedId = null, String existingCreatedAt = null) {
   if (!(payload instanceof Map)) {
-    throw new IllegalArgumentException("JSON object expected")
+    throw new IllegalArgumentException("Objeto JSON esperado")
   }
 
   def nowIso = isoNow()
@@ -579,12 +581,12 @@ private Map normalizeRule(payload, String forcedId = null, String existingCreate
 }
 
 private void validateRuleOrThrow(Map rule) {
-  if (!rule.name?.trim()) throw new IllegalArgumentException("Rule name is required")
-  if (rule.triggers.size() > 5) throw new IllegalArgumentException("Too many triggers")
-  if (rule.conditions.size() > 10) throw new IllegalArgumentException("Too many conditions")
-  if (rule.actions.size() > 200) throw new IllegalArgumentException("Too many actions")
-  if (rule.triggers.isEmpty()) throw new IllegalArgumentException("At least one trigger is required")
-  if (rule.actions.isEmpty()) throw new IllegalArgumentException("At least one action is required")
+  if (!rule.name?.trim()) throw new IllegalArgumentException("O nome da regra é obrigatório")
+  if (rule.triggers.size() > 5) throw new IllegalArgumentException("Gatilhos demais")
+  if (rule.conditions.size() > 10) throw new IllegalArgumentException("Condições demais")
+  if (rule.actions.size() > 200) throw new IllegalArgumentException("Ações demais")
+  if (rule.triggers.isEmpty()) throw new IllegalArgumentException("É necessário informar ao menos um gatilho")
+  if (rule.actions.isEmpty()) throw new IllegalArgumentException("É necessário informar ao menos uma ação")
 
   rule.triggers.each { trigger ->
     validateTriggerBlock(trigger)
@@ -599,28 +601,42 @@ private void validateRuleOrThrow(Map rule) {
   }
 }
 
+private String validationLabel(String label) {
+  if (label == "trigger") return "gatilho"
+  if (label == "condition") return "condição"
+  if (label == "action") return "ação"
+  return "${label}"
+}
+
+private String validationLabelPlural(String label) {
+  if (label == "trigger") return "gatilhos"
+  if (label == "condition") return "condições"
+  if (label == "action") return "ações"
+  return "${label}s"
+}
+
 private void validateDeviceAttributeBlock(block, String label) {
-  if (!(block instanceof Map)) throw new IllegalArgumentException("Invalid ${label}")
-  if (block.type != "device") throw new IllegalArgumentException("Only device ${label}s are supported")
+  if (!(block instanceof Map)) throw new IllegalArgumentException("${validationLabel(label)} inválido")
+  if (block.type != "device") throw new IllegalArgumentException("Apenas ${validationLabelPlural(label)} de dispositivo são suportados")
 
   def device = findAllowedDevice(block.deviceId)
-  if (!device) throw new IllegalArgumentException("Unauthorized ${label} device ${block.deviceId}")
+  if (!device) throw new IllegalArgumentException("Dispositivo de ${validationLabel(label)} não autorizado: ${block.deviceId}")
 
   def attribute = "${block.attribute ?: ""}".trim()
-  if (!attribute) throw new IllegalArgumentException("${label} attribute is required")
+  if (!attribute) throw new IllegalArgumentException("O atributo de ${validationLabel(label)} é obrigatório")
 
   if (!attributeAllowed(device, attribute)) {
-    throw new IllegalArgumentException("Attribute not available on ${device.displayName}: ${attribute}")
+    throw new IllegalArgumentException("Atributo indisponível em ${device.displayName}: ${attribute}")
   }
 
   def operator = "${block.operator ?: "eq"}".toLowerCase()
   if (!["eq", "neq", "gt", "gte", "lt", "lte", "contains"].contains(operator)) {
-    throw new IllegalArgumentException("Unsupported operator: ${operator}")
+    throw new IllegalArgumentException("Operador não suportado: ${operator}")
   }
 }
 
 private void validateTriggerBlock(trigger) {
-  if (!(trigger instanceof Map)) throw new IllegalArgumentException("Invalid trigger")
+  if (!(trigger instanceof Map)) throw new IllegalArgumentException("Gatilho inválido")
 
   if (trigger.type == "device") {
     validateDeviceAttributeBlock(trigger, "trigger")
@@ -632,40 +648,40 @@ private void validateTriggerBlock(trigger) {
     return
   }
 
-  throw new IllegalArgumentException("Unsupported trigger type: ${trigger.type}")
+  throw new IllegalArgumentException("Tipo de gatilho não suportado: ${trigger.type}")
 }
 
 private void validateTimeTriggerBlock(trigger) {
   String time = "${trigger.time ?: ""}".trim()
   if (!isValidTimeOfDay(time)) {
-    throw new IllegalArgumentException("Invalid time trigger. Use HH:mm")
+    throw new IllegalArgumentException("Gatilho por horário inválido. Use HH:mm")
   }
 
   def days = normalizeTriggerDays(trigger.days)
   if (trigger.days != null && days.isEmpty()) {
-    throw new IllegalArgumentException("Invalid time trigger days")
+    throw new IllegalArgumentException("Dias do gatilho por horário inválidos")
   }
 }
 
 private void validateActionBlock(action) {
-  if (!(action instanceof Map)) throw new IllegalArgumentException("Invalid action")
+  if (!(action instanceof Map)) throw new IllegalArgumentException("Ação inválida")
 
   if (action.type == "delay") {
     Integer seconds = safeInt(action.seconds, 0)
-    if (seconds < 1 || seconds > 86400) throw new IllegalArgumentException("Invalid delay seconds")
+    if (seconds < 1 || seconds > 86400) throw new IllegalArgumentException("Segundos de atraso inválidos")
     return
   }
 
   if (action.type != "deviceCommand") {
-    throw new IllegalArgumentException("Unsupported action type: ${action.type}")
+    throw new IllegalArgumentException("Tipo de ação não suportado: ${action.type}")
   }
 
   def device = findAllowedDevice(action.deviceId)
-  if (!device) throw new IllegalArgumentException("Unauthorized action device ${action.deviceId}")
+  if (!device) throw new IllegalArgumentException("Dispositivo de ação não autorizado: ${action.deviceId}")
 
   String command = "${action.command ?: ""}".trim()
   if (!isCommandAllowed(device, command)) {
-    throw new IllegalArgumentException("Command not allowed on ${device.displayName}: ${command}")
+    throw new IllegalArgumentException("Comando não permitido em ${device.displayName}: ${command}")
   }
 
   normalizeCommandArgs(command, action.args instanceof List ? action.args : [])
@@ -678,32 +694,32 @@ private Boolean attributeAllowed(device, String attribute) {
 
 private List normalizeCommandArgs(String command, List rawArgs) {
   def args = rawArgs ?: []
-  if (args.size() > 3) throw new IllegalArgumentException("Too many command args")
+  if (args.size() > 3) throw new IllegalArgumentException("Argumentos demais para o comando")
 
   if (command in ["on", "off"]) {
-    if (!args.isEmpty()) throw new IllegalArgumentException("${command} does not accept args")
+    if (!args.isEmpty()) throw new IllegalArgumentException("${command} não aceita argumentos")
     return []
   }
 
   if (command == "setLevel") {
     Integer level = safeInt(args ? args[0] : null, -1)
-    if (level < 0 || level > 100) throw new IllegalArgumentException("setLevel requires 0-100")
+    if (level < 0 || level > 100) throw new IllegalArgumentException("setLevel exige um valor entre 0 e 100")
     return [level]
   }
 
   if (command == "setColorTemperature") {
     Integer kelvin = safeInt(args ? args[0] : null, -1)
-    if (kelvin < 1500 || kelvin > 10000) throw new IllegalArgumentException("setColorTemperature requires 1500-10000")
+    if (kelvin < 1500 || kelvin > 10000) throw new IllegalArgumentException("setColorTemperature exige um valor entre 1500 e 10000")
     return [kelvin]
   }
 
   if (command in ["setHeatingSetpoint", "setCoolingSetpoint", "setThermostatSetpoint"]) {
     BigDecimal value = safeDecimal(args ? args[0] : null)
-    if (value == null || value < 5 || value > 35) throw new IllegalArgumentException("${command} requires 5-35")
+    if (value == null || value < 5 || value > 35) throw new IllegalArgumentException("${command} exige um valor entre 5 e 35")
     return [value]
   }
 
-  if (!args.isEmpty()) throw new IllegalArgumentException("${command} does not accept args in MVP")
+  if (!args.isEmpty()) throw new IllegalArgumentException("${command} não aceita argumentos nesta versão")
   return []
 }
 
@@ -865,6 +881,34 @@ private Boolean selectedDeviceContains(String key, device) {
   return selectedDevices(key).any { "${it.id}" == id }
 }
 
+private String safeRoomId(device) {
+  try {
+    def roomId = device?.roomId
+    return roomId == null ? "" : "${roomId}".trim()
+  } catch (ignored) {}
+
+  try {
+    def roomId = device?.getRoomId()
+    return roomId == null ? "" : "${roomId}".trim()
+  } catch (ignored) {
+    return ""
+  }
+}
+
+private String safeRoomName(device) {
+  try {
+    def roomName = device?.roomName
+    return roomName == null ? "" : "${roomName}".trim()
+  } catch (ignored) {}
+
+  try {
+    def roomName = device?.getRoomName()
+    return roomName == null ? "" : "${roomName}".trim()
+  } catch (ignored) {
+    return ""
+  }
+}
+
 private List safeCapabilities(device) {
   try {
     return device.capabilities*.name?.findAll { it }?.unique() ?: []
@@ -924,7 +968,7 @@ private List rulesUiLines(Integer maxItems = null) {
 
       def parts = [name, enabledLabel]
       if (triggerText) parts.add("Gatilhos: ${triggerText}")
-      if (actionText) parts.add("Acoes: ${actionText}")
+      if (actionText) parts.add("Ações: ${actionText}")
       return parts.join(" | ")
     }
 
@@ -948,7 +992,7 @@ private Map schedulerStatus() {
   def lastMatchText = lastMatch ? "${lastMatch.ruleName ?: lastMatch.ruleId} em ${lastMatch.time} (${lastMatch.day})" : ""
   def actionErrors = state?.lastExecutionErrors instanceof List ? state.lastExecutionErrors : []
   def lastActionError = actionErrors ? actionErrors[actionErrors.size() - 1] : null
-  def lastActionErrorText = lastActionError ? "${lastActionError.ruleId ?: 'regra'} ${lastActionError.deviceId ?: 'device'} ${lastActionError.command ?: 'comando'}: ${lastActionError.message ?: 'erro'}" : ""
+  def lastActionErrorText = lastActionError ? "${lastActionError.ruleId ?: 'regra'} ${lastActionError.deviceId ?: 'dispositivo'} ${lastActionError.command ?: 'comando'}: ${lastActionError.message ?: 'erro'}" : ""
 
   return [
     ruleCount: rules?.size() ?: 0,
@@ -970,7 +1014,7 @@ private String formatTrigger(trigger) {
     def time = "${trigger.time ?: ""}".trim()
     def days = normalizeTriggerDays(trigger.days)
     def dayLabel = days ? days.join(",") : "todos"
-    return "Horario ${time} (${dayLabel})"
+    return "Horário ${time} (${dayLabel})"
   }
 
   if (trigger.type == "device") {
@@ -990,7 +1034,7 @@ private String formatAction(action) {
 
   if (action.type == "delay") {
     def seconds = safeInt(action.seconds, 0)
-    return "Delay ${seconds}s"
+    return "Atraso ${seconds}s"
   }
 
   if (action.type == "deviceCommand") {
@@ -1035,11 +1079,11 @@ def rulesListPage() {
     section("Resumo") {
       def status = schedulerStatus()
       paragraph "Regras totais: ${status.ruleCount}"
-      paragraph "Regras com horario: ${status.timeRuleCount}"
-      paragraph "Agendador ativo: ${status.schedulerActive ? 'sim' : 'nao'}"
-      paragraph "Metodo do agendador: ${status.schedulerMethod ?: 'nenhum'}"
-      paragraph "Ultimo tick: ${status.lastTick ?: 'nunca'}"
-      paragraph "Ultimo disparo por horario: ${status.lastTimeTriggerMatch ?: 'nunca'}"
+      paragraph "Regras com horário: ${status.timeRuleCount}"
+      paragraph "Agendador ativo: ${status.schedulerActive ? 'sim' : 'não'}"
+      paragraph "Método do agendador: ${status.schedulerMethod ?: 'nenhum'}"
+      paragraph "Último tick: ${status.lastTick ?: 'nunca'}"
+      paragraph "Último disparo por horário: ${status.lastTimeTriggerMatch ?: 'nunca'}"
       if (status.lastSchedulerError) paragraph "Erro do agendador: ${status.lastSchedulerError}"
     }
 
@@ -1047,7 +1091,7 @@ def rulesListPage() {
       href(
         name: "refreshSchedulerFromList",
         title: "Rearmar agendador",
-        description: "Recria o agendamento interno das regras por horario",
+        description: "Recria o agendamento interno das regras por horário",
         page: "schedulerRefreshPage"
       )
     }
@@ -1080,7 +1124,7 @@ def ruleDetailPage(param = null) {
     def rule = getRulesMap()[ruleId]
     if (!rule) {
       section("Aviso") {
-        paragraph "Regra nao encontrada."
+        paragraph "Regra não encontrada."
       }
       return
     }
@@ -1089,11 +1133,11 @@ def ruleDetailPage(param = null) {
       paragraph buildRuleSummary(rule)
     }
 
-    section("Acoes") {
+    section("Ações") {
       href(
         name: "edit_${ruleId}",
         title: "Editar regra (JSON)",
-        description: "Editar nome, horarios, acoes e condicoes",
+        description: "Editar nome, horários, ações e condições",
         page: "ruleEditPage",
         params: [ruleId: ruleId]
       )
@@ -1101,7 +1145,7 @@ def ruleDetailPage(param = null) {
       href(
         name: "toggle_${ruleId}",
         title: rule.enabled == false ? "Ativar regra" : "Pausar regra",
-        description: rule.enabled == false ? "Volta a executar" : "Interrompe execucao",
+        description: rule.enabled == false ? "Volta a executar" : "Interrompe execução",
         page: "ruleTogglePage",
         params: [ruleId: ruleId, enabled: rule.enabled == false ? "true" : "false"]
       )
@@ -1137,7 +1181,7 @@ def ruleEditPage(param = null) {
   return dynamicPage(name: "ruleEditPage", title: "Editar regra", install: false, uninstall: false) {
     if (!rule) {
       section("Aviso") {
-        paragraph "Regra nao encontrada."
+        paragraph "Regra não encontrada."
       }
       return
     }
@@ -1146,10 +1190,10 @@ def ruleEditPage(param = null) {
     def currentDraft = settings?.get(draftKey) ?: JsonOutput.prettyPrint(JsonOutput.toJson(rule))
 
     section("JSON da regra") {
-      paragraph "Edite o JSON com cuidado. O id da regra e preservado."
+      paragraph "Edite o JSON com cuidado. O ID da regra é preservado."
       input name: draftKey,
         type: "textarea",
-        title: "Conteudo",
+        title: "Conteúdo",
         required: true,
         defaultValue: currentDraft,
         submitOnChange: false
@@ -1158,7 +1202,7 @@ def ruleEditPage(param = null) {
     section("Salvar") {
       href(
         name: "save_${ruleId}",
-        title: "Salvar alteracoes",
+        title: "Salvar alterações",
         description: "Aplica o JSON editado",
         page: "ruleSavePage",
         params: [ruleId: ruleId]
@@ -1213,7 +1257,7 @@ def ruleTogglePage(param = null) {
     try {
       def rule = setRuleEnabledInternal(ruleId, enabled)
       section("Sucesso") {
-        paragraph "Regra ${rule?.name ?: ruleId} agora esta ${enabled ? 'ativa' : 'pausada'}."
+        paragraph "Regra ${rule?.name ?: ruleId} agora está ${enabled ? 'ativa' : 'pausada'}."
       }
     } catch (Exception e) {
       section("Erro") {
@@ -1239,7 +1283,7 @@ def ruleRunPage(param = null) {
     def rule = getRulesMap()[ruleId]
     if (!rule) {
       section("Erro") {
-        paragraph "Regra nao encontrada."
+        paragraph "Regra não encontrada."
       }
       return
     }
@@ -1272,12 +1316,12 @@ def ruleDeletePage(param = null) {
 
   return dynamicPage(name: "ruleDeletePage", title: "Remover regra", install: false, uninstall: false) {
     if (!confirm) {
-      section("Confirmacao") {
+      section("Confirmação") {
         paragraph "Deseja remover a regra ${ruleId}?"
         href(
           name: "confirm_${ruleId}",
-          title: "Confirmar remocao",
-          description: "Esta acao nao pode ser desfeita",
+          title: "Confirmar remoção",
+          description: "Esta ação não pode ser desfeita",
           page: "ruleDeletePage",
           params: [ruleId: ruleId, confirm: "true"]
         )
@@ -1306,7 +1350,7 @@ def ruleDeletePage(param = null) {
     }
 
     section("Voltar") {
-      href(name: "back_rules", title: "Voltar a lista", page: "rulesListPage")
+      href(name: "back_rules", title: "Voltar à lista", page: "rulesListPage")
     }
   }
 }
@@ -1320,9 +1364,9 @@ def schedulerRefreshPage(param = null) {
 
       section("Agendador") {
         paragraph "Agendador recriado."
-        paragraph "Horario atual detectado: ${currentMinute.date} ${currentMinute.time} (${currentMinute.day})"
-        paragraph "Regras por horario ativas: ${status.timeRuleCount}"
-        paragraph "Metodo: ${status.schedulerMethod ?: 'nenhum'}"
+        paragraph "Horário atual detectado: ${currentMinute.date} ${currentMinute.time} (${currentMinute.day})"
+        paragraph "Regras por horário ativas: ${status.timeRuleCount}"
+        paragraph "Método: ${status.schedulerMethod ?: 'nenhum'}"
       }
     } catch (Exception e) {
       section("Erro") {
@@ -1359,7 +1403,7 @@ private def pageParamValue(param, String key, fallback = null) {
 private Map updateRuleInternal(String ruleId, Map payload) {
   def rules = getRulesMap()
   def existing = rules[ruleId]
-  if (!existing) throw new IllegalArgumentException("Rule not found")
+  if (!existing) throw new IllegalArgumentException("Regra não encontrada")
 
   def rule = normalizeRule(payload, ruleId, existing.createdAt)
   validateRuleOrThrow(rule)
@@ -1374,7 +1418,7 @@ private Map updateRuleInternal(String ruleId, Map payload) {
 private Map setRuleEnabledInternal(String ruleId, Boolean enabled) {
   def rules = getRulesMap()
   def rule = rules[ruleId]
-  if (!rule) throw new IllegalArgumentException("Rule not found")
+  if (!rule) throw new IllegalArgumentException("Regra não encontrada")
 
   rule.enabled = enabled
   rule.updatedAt = isoNow()
@@ -1388,7 +1432,7 @@ private Map setRuleEnabledInternal(String ruleId, Boolean enabled) {
 
 private void deleteRuleInternal(String ruleId) {
   def rules = getRulesMap()
-  if (!rules[ruleId]) throw new IllegalArgumentException("Rule not found")
+  if (!rules[ruleId]) throw new IllegalArgumentException("Regra não encontrada")
 
   rules.remove(ruleId)
   state.rules = rules
@@ -1409,7 +1453,7 @@ private String buildRuleSummary(rule) {
 
   def parts = ["Status: ${enabledLabel}"]
   if (triggerText) parts.add("Gatilhos: ${triggerText}")
-  if (actionText) parts.add("Acoes: ${actionText}")
+  if (actionText) parts.add("Ações: ${actionText}")
   return parts.join("\n")
 }
 
@@ -1442,11 +1486,11 @@ private def endpoint(Closure work) {
   try {
     return work.call()
   } catch (IllegalArgumentException e) {
-    log.warn "Bad request: ${e.message}"
+    log.warn "Requisição inválida: ${e.message}"
     return renderError(400, e.message)
   } catch (Exception e) {
-    log.warn "Endpoint failed: ${e.message}"
-    return renderError(500, e.message ?: "Internal error")
+    log.warn "Falha no endpoint: ${e.message}"
+    return renderError(500, e.message ?: "Erro interno")
   }
 }
 
@@ -1459,13 +1503,13 @@ private def readJsonBody() {
     def body = request?.body ?: "{}"
     return new JsonSlurper().parseText("${body}")
   } catch (ignored) {
-    throw new IllegalArgumentException("Invalid JSON")
+    throw new IllegalArgumentException("JSON inválido")
   }
 }
 
 private void rejectOversizedPayload(payload) {
   def size = JsonOutput.toJson(payload ?: [:]).size()
-  if (size > 20000) throw new IllegalArgumentException("Rule payload too large")
+  if (size > 20000) throw new IllegalArgumentException("Payload da regra muito grande")
 }
 
 private String ruleIdParam() {
