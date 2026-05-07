@@ -4,24 +4,44 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Local documentation
+*.md
+
 # Environment variables
-.env
-.env.local
-.env.production
-.env.development
+.env*
 .dev.vars
+!.env.example
+!.dev.vars.example
+
+# Local project overrides
+config.local.js
+config.*.local.js
 
 
 
 # Build outputs
 dist/
 build/
+coverage/
 
 # Editor directories and files
 .vscode/settings.json
+.idea/
 *.swp
 *.swo
 *~
+
+# Tool caches
+.cache/
+.vite/
+.parcel-cache/
+.turbo/
+.wrangler/
+.mf/
+
+# Temporary files
+tmp/
+temp/
 
 # OS generated files
 .DS_Store
