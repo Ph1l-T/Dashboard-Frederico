@@ -316,7 +316,7 @@
       setFeedback("", "neutral");
     } catch (error) {
       list.innerHTML =
-        '<p class="routines-empty">Nao foi possivel carregar as rotinas.</p>';
+        '<p class="routines-empty">Não foi possível carregar as rotinas.</p>';
       setFeedback(error?.message || "Falha ao carregar rotinas.", "error");
     }
   }
@@ -674,7 +674,7 @@
     if (!name) throw new Error("Informe um nome para a rotina.");
     if (!deviceIds.length) throw new Error("Selecione ao menos um dispositivo.");
     if (deviceIds.length > MAX_ROUTINE_DEVICES) {
-      throw new Error(`Selecione ate ${MAX_ROUTINE_DEVICES} dispositivos por rotina.`);
+      throw new Error(`Selecione até ${MAX_ROUTINE_DEVICES} dispositivos por rotina.`);
     }
     if (!onEnabled && !offEnabled) throw new Error("Ative ao menos uma ação da rotina.");
     if (onEnabled && !onTime) throw new Error("Informe um horário válido para ligar.");
@@ -736,7 +736,7 @@
       const editMode = isEditMode();
       const existingRoutine = editMode ? getRoutineById(state.editingRoutineId) : null;
       if (editMode && !existingRoutine) {
-        throw new Error("Rotina nao encontrada para editar.");
+        throw new Error("Rotina não encontrada para editar.");
       }
 
       const rules = buildRoutineRules(existingRoutine);
@@ -820,7 +820,7 @@
 
   function editRoutine(routineId) {
     if (!getRoutineById(routineId)) {
-      setFeedback("Rotina nao encontrada para editar.", "error");
+      setFeedback("Rotina não encontrada para editar.", "error");
       return;
     }
 
@@ -836,7 +836,7 @@
     const routine = getRoutineById(routineId);
     const rule = command === "on" ? routine?.onRule : routine?.offRule;
     const label = command === "on" ? "ligar" : "desligar";
-    if (!rule?.id) throw new Error(`Regra de ${label} nao encontrada.`);
+    if (!rule?.id) throw new Error(`Regra de ${label} não encontrada.`);
 
     setFeedback(`Executando ${label} agora...`, "neutral");
     await api(`/rules/${rule.id}/run`, { method: "POST" });

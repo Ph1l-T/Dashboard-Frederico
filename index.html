@@ -33,10 +33,10 @@
         src: url("fonts/raleway/Raleway-latin-700.woff2") format("woff2");
       }
     </style>
-    <link rel="preload" href="styles.css?v=1.0.41" as="style" />
-    <link rel="stylesheet" href="styles.css?v=1.0.41" />
+    <link rel="preload" href="styles.css?v=1.0.45" as="style" />
+    <link rel="stylesheet" href="styles.css?v=1.0.45" />
     <link rel="stylesheet" href="main-home.css?v=1.0.0" />
-    <link rel="stylesheet" href="routines.css?v=1.0.13" />
+    <link rel="stylesheet" href="routines.css?v=1.0.18" />
     <script src="config.js?v=1.0.21"></script>
     <link rel="icon" href="images/pwa/app-icon-192.png" type="image/png" />
     <link rel="manifest" href="manifest.json" />
@@ -1823,7 +1823,7 @@
         if (routinesScriptPromise) return routinesScriptPromise;
         routinesScriptPromise = new Promise((resolve, reject) => {
           const script = document.createElement("script");
-          script.src = "routines.js?v=1.0.9";
+          script.src = "routines.js?v=1.0.10";
           script.async = true;
           script.onload = resolve;
           script.onerror = () =>
@@ -4027,10 +4027,7 @@
 
                                 <div class="routines-devices-card routines-field--wide">
                                     <div class="routines-days-head routines-days-head--stacked">
-                                        <div>
-                                            <span>Dispositivos</span>
-                                            <span id="routine-devices-selected-count" class="routines-selection-count">Nenhum selecionado</span>
-                                        </div>
+                                        <span>Dispositivos</span>
                                         <div class="routines-inline-actions">
                                             <button type="button" id="routine-devices-all" class="routines-btn routines-btn--ghost">Todos</button>
                                             <button type="button" id="routine-devices-clear" class="routines-btn routines-btn--ghost">Limpar</button>
@@ -4131,6 +4128,9 @@
                         <div class="scenes-divider" aria-hidden="true"></div>
 
                         <section class="scenes-list-card">
+                            <div class="scenes-section-head">
+                                <h2 class="scenes-section-title">Cenários</h2>
+                            </div>
                             <div id="scenes-feedback" class="scenes-feedback" aria-live="polite"></div>
                             <div id="scenes-user-list" class="scenes-user-list"></div>
                         </section>
@@ -4160,7 +4160,7 @@
                     <div class="scenes-shell scenes-shell--builder">
                         <section class="scenes-builder-card">
                             <div class="scenes-card-head">
-                                <h2 class="scenes-card-title">Editor de Cenário</h2>
+                                <h2 class="scenes-card-title">Cenário</h2>
                                 <p class="scenes-card-subtitle">Monte ações por dispositivo, em ordem.</p>
                             </div>
 
@@ -6484,8 +6484,8 @@
           renderSpa();
           schedulePrebuild();
 
-          // Fail-safe: se o script principal nao iniciar por algum motivo,
-          // tenta inicializar e/ou remove o loader para nao travar a UI.
+          // Fail-safe: se o script principal não iniciar por algum motivo,
+          // tenta inicializar e/ou remove o loader para não travar a UI.
           setTimeout(() => {
             try {
               if (

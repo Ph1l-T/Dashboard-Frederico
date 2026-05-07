@@ -4289,11 +4289,38 @@ body.app-info-open {
   font-size: 11px;
   font-weight: 400;
 }
+:root {
+  --app-glass-border: rgba(255, 255, 255, 0.09);
+  --app-glass-border-strong: rgba(255, 255, 255, 0.16);
+  --app-glass-bg:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.012)),
+    rgba(8, 8, 8, 0.84);
+  --app-glass-bg-soft:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.042), rgba(255, 255, 255, 0.014)),
+    rgba(10, 10, 10, 0.78);
+  --app-glass-bg-muted:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.008)),
+    rgba(4, 4, 4, 0.76);
+  --app-glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 14px 30px rgba(0, 0, 0, 0.28);
+  --app-glass-shadow-soft:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
 .scene-control-card {
   height: 145px;
 }
 
 .scenes-page-container {
+  --scene-glass-border: var(--app-glass-border);
+  --scene-glass-border-strong: var(--app-glass-border-strong);
+  --scene-glass-bg: var(--app-glass-bg);
+  --scene-glass-bg-soft: var(--app-glass-bg-soft);
+  --scene-glass-bg-muted: var(--app-glass-bg-muted);
+  --scene-glass-shadow: var(--app-glass-shadow);
+  --scene-glass-shadow-soft: var(--app-glass-shadow-soft);
   max-width: 100% !important;
   padding: 0;
 }
@@ -4313,21 +4340,29 @@ body.app-info-open {
   gap: 12px;
 }
 
+.scenes-shell--list {
+  gap: 8px;
+}
+
 .scenes-shell--builder {
   padding: 104px 21px calc(var(--bottom-nav-dock-space, 0px) + 20px);
 }
 
 .scenes-create-section {
+  display: grid;
+  gap: 8px;
   width: 100%;
 }
 
-.scene-control-card--create {
+.scene-control-card--create,
+.scenes-create-section .scene-control-card--routine {
   width: 100%;
   min-height: 76px;
   height: 76px;
 }
 
-.scene-control-card--create .control-label {
+.scene-control-card--create .control-label,
+.scene-control-card--routine .control-label {
   font-size: 20px;
   font-weight: 400;
 }
@@ -4361,6 +4396,19 @@ body.app-info-open {
   -webkit-backdrop-filter: none;
   box-shadow: none;
   padding: 0;
+}
+
+.scenes-section-head {
+  margin-bottom: 8px;
+}
+
+.scenes-section-title {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: Raleway, Arial, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
 .scenes-card-head {
@@ -5535,6 +5583,217 @@ body.app-info-open {
 
 .scenes-builder-page #scene-back-btn {
   display: none !important;
+}
+
+.scenes-page-container .scene-control-card {
+  border: 1px solid var(--scene-glass-border);
+  border-radius: 8px;
+  background: var(--scene-glass-bg-soft);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--scene-glass-shadow-soft);
+}
+
+.scenes-page-container .scenes-builder-card,
+.scenes-page-container .scenes-list-card,
+.scenes-page-container .scenes-shell--list .scenes-list-card {
+  border: 1px solid var(--scene-glass-border);
+  border-radius: 8px;
+  background: var(--scene-glass-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: var(--scene-glass-shadow);
+  padding: 20px 20px 8px;
+}
+
+.scenes-page-container .scenes-shell--list .scenes-list-card {
+  padding: 14px;
+}
+
+.scenes-page-container .scenes-user-list,
+.scenes-page-container .routines-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.scenes-builder-page .scenes-builder-card {
+  width: 100%;
+  border: 1px solid var(--scene-glass-border);
+  border-radius: 8px;
+  background: var(--scene-glass-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: var(--scene-glass-shadow);
+  padding: 20px 20px 8px;
+  box-sizing: border-box;
+}
+
+.scenes-builder-page .scenes-shell--builder {
+  bottom: 0;
+  padding: 12px clamp(12px, 3vw, 40px)
+    calc(82px + env(safe-area-inset-bottom, 0px));
+  scroll-padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+}
+
+.scenes-page-container .scenes-card-title {
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  font-weight: 800;
+  line-height: 1.08;
+}
+
+.scenes-page-container .scenes-card-subtitle {
+  max-width: 620px;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.scenes-page-container .scenes-field-label,
+.scenes-page-container .scenes-steps-card .scenes-field-label {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.scenes-page-container .scenes-input,
+.scenes-page-container .scenes-select {
+  min-height: 46px;
+  font-size: 0.88rem;
+}
+
+.scenes-page-container .scenes-picker-stage-title {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.scenes-page-container .scenes-picker-stage-meta,
+.scenes-page-container .scenes-card-subtitle {
+  font-family: Raleway, Arial, sans-serif;
+}
+
+.scenes-page-container .scenes-step-builder,
+.scenes-page-container .scenes-steps-card,
+.scenes-page-container .scene-user-card {
+  border: 1px solid var(--scene-glass-border);
+  border-radius: 8px;
+  background: var(--scene-glass-bg-soft);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--scene-glass-shadow-soft);
+}
+
+.scenes-page-container .scenes-step-tab,
+.scenes-page-container .scenes-selection-card,
+.scenes-page-container .scenes-picker-device-item,
+.scenes-page-container .scenes-picker-command-item,
+.scenes-page-container .scenes-command-context,
+.scenes-page-container .scene-step-item,
+.scenes-page-container .scene-user-icon-wrap,
+.scenes-page-container .scene-user-menu-trigger,
+.scenes-page-container .scene-user-env-chip,
+.scenes-page-container .scenes-picker-check,
+.scenes-page-container .scene-step-index,
+.scenes-page-container .scene-step-action-btn {
+  border-color: var(--scene-glass-border);
+  background: var(--scene-glass-bg-muted);
+  box-shadow: var(--scene-glass-shadow-soft);
+}
+
+.scenes-page-container .scenes-step-tab.is-active,
+.scenes-page-container .scenes-picker-device-item.is-selected,
+.scenes-page-container .scenes-picker-command-item.is-selected {
+  border-color: var(--scene-glass-border-strong);
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.04)),
+    rgba(8, 8, 8, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 24px rgba(0, 0, 0, 0.24);
+}
+
+.scenes-page-container .scenes-picker-device-item:hover,
+.scenes-page-container .scenes-picker-command-item:hover,
+.scenes-page-container .scenes-selection-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018)),
+    rgba(8, 8, 8, 0.76);
+}
+
+.scenes-page-container .scenes-input,
+.scenes-page-container .scenes-select {
+  border: 1px solid var(--scene-glass-border);
+  border-radius: 8px;
+  background: var(--scene-glass-bg-muted);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.scenes-page-container .scenes-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.scenes-page-container .scenes-btn--secondary,
+.scenes-page-container .scenes-btn--ghost {
+  border: 1px solid var(--scene-glass-border);
+  background: var(--scene-glass-bg-soft);
+  color: #fff;
+  box-shadow: var(--scene-glass-shadow-soft);
+}
+
+.scenes-page-container .scenes-picker-empty,
+.scenes-page-container .scene-step-empty,
+.scenes-page-container .scene-user-empty {
+  border-color: var(--scene-glass-border);
+  background: var(--scene-glass-bg-muted);
+}
+
+.scenes-page-container .scene-user-empty,
+.scenes-page-container .routines-empty {
+  min-height: 64px;
+  display: grid;
+  place-items: center;
+  padding: 18px 14px;
+  border: 1px solid var(--scene-glass-border);
+  border-radius: 8px;
+  background: var(--scene-glass-bg-muted);
+  color: rgba(255, 255, 255, 0.68);
+  font-family: Raleway, Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+@media (width <= 720px) {
+  .scenes-page-container .scenes-builder-card {
+    padding: 14px 14px 8px;
+  }
+
+  .scenes-page-container .scenes-card-title {
+    font-size: 1.24rem;
+  }
+
+  .scenes-page-container .scenes-card-subtitle {
+    font-size: 0.86rem;
+  }
+
+  .scenes-page-container .scenes-card-head {
+    margin-bottom: 14px;
+  }
+
+  .scenes-page-container .scenes-input,
+  .scenes-page-container .scenes-select {
+    min-height: 44px;
+  }
 }
 
 @media (width >= 1024px) {

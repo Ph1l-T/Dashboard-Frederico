@@ -1,21 +1,31 @@
 .routines-page-container {
-  --routine-glass-border: rgba(255, 255, 255, 0.09);
-  --routine-glass-border-strong: rgba(255, 255, 255, 0.16);
-  --routine-glass-bg:
+  --routine-glass-border: var(--app-glass-border, rgba(255, 255, 255, 0.09));
+  --routine-glass-border-strong: var(--app-glass-border-strong, rgba(255, 255, 255, 0.16));
+  --routine-glass-bg: var(
+    --app-glass-bg,
     linear-gradient(135deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.012)),
-    rgba(8, 8, 8, 0.84);
-  --routine-glass-bg-soft:
+    rgba(8, 8, 8, 0.84)
+  );
+  --routine-glass-bg-soft: var(
+    --app-glass-bg-soft,
     linear-gradient(180deg, rgba(255, 255, 255, 0.042), rgba(255, 255, 255, 0.014)),
-    rgba(10, 10, 10, 0.78);
-  --routine-glass-bg-muted:
+    rgba(10, 10, 10, 0.78)
+  );
+  --routine-glass-bg-muted: var(
+    --app-glass-bg-muted,
     linear-gradient(180deg, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.008)),
-    rgba(4, 4, 4, 0.76);
-  --routine-glass-shadow:
+    rgba(4, 4, 4, 0.76)
+  );
+  --routine-glass-shadow: var(
+    --app-glass-shadow,
     inset 0 1px 0 rgba(255, 255, 255, 0.045),
-    0 14px 30px rgba(0, 0, 0, 0.28);
-  --routine-glass-shadow-soft:
+    0 14px 30px rgba(0, 0, 0, 0.28)
+  );
+  --routine-glass-shadow-soft: var(
+    --app-glass-shadow-soft,
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 8px 18px rgba(0, 0, 0, 0.2);
+    0 8px 18px rgba(0, 0, 0, 0.2)
+  );
   min-height: 100dvh;
   padding: 0;
   overflow: hidden;
@@ -136,7 +146,7 @@
   width: 100%;
   min-height: 76px;
   height: 76px;
-  margin-top: 12px;
+  margin-top: 0;
 }
 
 .scene-control-card--routine .control-label {
@@ -145,23 +155,60 @@
 }
 
 .routines-list-panel--embedded {
-  margin-top: 16px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
+  margin-top: 0;
+  padding: 14px;
+  border: 1px solid var(--scene-glass-border, rgba(255, 255, 255, 0.09));
+  border-radius: 8px;
+  background: var(
+    --scene-glass-bg,
+    linear-gradient(135deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.012)),
+    rgba(8, 8, 8, 0.84)
+  );
+  backdrop-filter: blur(18px);
+  box-shadow: var(
+    --scene-glass-shadow,
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 14px 30px rgba(0, 0, 0, 0.28)
+  );
+}
+
+.routines-list-panel--embedded .routines-list {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.routines-list-panel--embedded .routines-feedback:empty {
+  display: none;
+  min-height: 0;
+  margin: 0;
+}
+
+.routines-list-panel--embedded .routines-empty {
+  min-height: 64px;
+  display: grid;
+  place-items: center;
+  padding: 18px 14px;
+  border: 1px solid var(--scene-glass-border, rgba(255, 255, 255, 0.09));
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.68);
+  background: var(
+    --scene-glass-bg-muted,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.008)),
+    rgba(4, 4, 4, 0.76)
+  );
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .routines-section-head {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .routines-section-title {
   margin: 0;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 0.95rem;
-  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.92rem;
+  font-weight: 800;
   line-height: 1.2;
 }
 
@@ -570,6 +617,34 @@
 .routines-days-head--stacked > div:first-child {
   display: grid;
   gap: 3px;
+}
+
+.routines-devices-card {
+  padding: 12px;
+}
+
+.routines-devices-card .routines-days-head {
+  align-items: center;
+  margin: 0 0 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.routines-devices-card .routines-days-head > span {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.94rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.routines-devices-card .routines-inline-actions {
+  gap: 8px;
+}
+
+.routines-devices-card .routines-btn {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 0.84rem;
 }
 
 .routines-selection-count {
