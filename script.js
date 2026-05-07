@@ -9390,24 +9390,158 @@ function handleMasterCurtainsClose() {
   );
 }
 
-function syncCurtainDrawers(currentDrawer) {
-  if (!currentDrawer || !currentDrawer.open) {
-    return;
+const CURTAIN_DRAWER_ANIMATION_MS = 460;
+
+function getCurtainDrawerAnimationDuration() {
+  if (
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    return 0;
   }
 
-  const drawerContainer = currentDrawer.closest(".curtain-layout");
+  return CURTAIN_DRAWER_ANIMATION_MS;
+}
+
+function updateCurtainDrawerAccessibility(drawer, expanded) {
+  const summary = drawer?.querySelector(".curtain-drawer__summary");
+  if (summary) {
+    summary.setAttribute("aria-expanded", expanded ? "true" : "false");
+  }
+}
+
+function closeSiblingCurtainDrawers(activeDrawer) {
+  const drawerContainer = activeDrawer?.closest(".curtain-layout");
   if (!drawerContainer) {
     return;
   }
 
-  drawerContainer
-    .querySelectorAll(".curtain-drawer[open]")
-    .forEach((drawer) => {
-      if (drawer !== currentDrawer) {
-        drawer.open = false;
-      }
-    });
+  drawerContainer.querySelectorAll(".curtain-drawer[open]").forEach((drawer) => {
+    if (drawer !== activeDrawer) {
+      setCurtainDrawerOpen(drawer, false);
+    }
+  });
 }
+
+function setCurtainDrawerOpen(drawer, shouldOpen) {
+  if (!drawer || typeof drawer.open === "undefined") {
+    return;
+  }
+
+  window.clearTimeout(drawer._curtainDrawerTimer);
+  drawer._curtainDrawerAnimationToken =
+    (drawer._curtainDrawerAnimationToken || 0) + 1;
+  const animationToken = drawer._curtainDrawerAnimationToken;
+  const duration = getCurtainDrawerAnimationDuration();
+
+  if (shouldOpen) {
+    drawer.open = true;
+    drawer.classList.remove("is-closing");
+    drawer.classList.add("is-animating");
+    drawer.classList.remove("is-open");
+    updateCurtainDrawerAccessibility(drawer, true);
+    closeSiblingCurtainDrawers(drawer);
+
+    drawer.getBoundingClientRect();
+
+    const finishOpen = () => {
+      if (drawer._curtainDrawerAnimationToken !== animationToken) {
+        return;
+      }
+
+      drawer.classList.remove("is-animating");
+      drawer._curtainDrawerTimer = null;
+    };
+
+    if (!duration) {
+      drawer.classList.add("is-open");
+      finishOpen();
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      if (
+        drawer._curtainDrawerAnimationToken !== animationToken ||
+        !drawer.open ||
+        drawer.classList.contains("is-closing")
+      ) {
+        return;
+      }
+
+      drawer.classList.add("is-open");
+      drawer._curtainDrawerTimer = window.setTimeout(finishOpen, duration);
+    });
+    return;
+  }
+
+  updateCurtainDrawerAccessibility(drawer, false);
+
+  if (!drawer.open) {
+    drawer.classList.remove("is-open", "is-closing", "is-animating");
+    return;
+  }
+
+  drawer.classList.add("is-closing", "is-animating");
+  drawer.classList.remove("is-open");
+
+  const finishClose = () => {
+    if (drawer._curtainDrawerAnimationToken !== animationToken) {
+      return;
+    }
+
+    drawer.open = false;
+    drawer.classList.remove("is-closing", "is-animating");
+    drawer._curtainDrawerTimer = null;
+  };
+
+  if (!duration) {
+    finishClose();
+    return;
+  }
+
+  drawer._curtainDrawerTimer = window.setTimeout(finishClose, duration);
+}
+
+function handleCurtainDrawerSummaryClick(event) {
+  const target = event.target;
+  if (!target || !target.closest) {
+    return;
+  }
+
+  const summary = target.closest(".curtain-drawer__summary");
+  if (!summary) {
+    return;
+  }
+
+  const drawer = summary.closest(".curtain-drawer");
+  if (!drawer) {
+    return;
+  }
+
+  event.preventDefault();
+  setCurtainDrawerOpen(
+    drawer,
+    !drawer.open || drawer.classList.contains("is-closing"),
+  );
+}
+
+function syncCurtainDrawers(currentDrawer) {
+  if (!currentDrawer) {
+    return;
+  }
+
+  if (!currentDrawer.open) {
+    currentDrawer.classList.remove("is-open", "is-closing", "is-animating");
+    updateCurtainDrawerAccessibility(currentDrawer, false);
+    return;
+  }
+
+  currentDrawer.classList.add("is-open");
+  updateCurtainDrawerAccessibility(currentDrawer, true);
+  closeSiblingCurtainDrawers(currentDrawer);
+}
+
+document.addEventListener("click", handleCurtainDrawerSummaryClick);
 
 // Exportar funções usadas em onclick="" no HTML (necessário para IIFE)
 window.toggleRoomControl = toggleRoomControl;

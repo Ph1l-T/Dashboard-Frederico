@@ -33,8 +33,8 @@
         src: url("fonts/raleway/Raleway-latin-700.woff2") format("woff2");
       }
     </style>
-    <link rel="preload" href="styles.css?v=1.0.46" as="style" />
-    <link rel="stylesheet" href="styles.css?v=1.0.46" />
+    <link rel="preload" href="styles.css?v=1.0.47" as="style" />
+    <link rel="stylesheet" href="styles.css?v=1.0.47" />
     <link rel="stylesheet" href="main-home.css?v=1.0.0" />
     <link rel="stylesheet" href="routines.css?v=1.0.19" />
     <script src="config.js?v=1.0.21"></script>
@@ -450,7 +450,7 @@
     <script src="auth.js?v=1.0.0" defer></script>
     <script src="access-control.js?v=1.0.1" defer></script>
     <script src="main-home.js?v=1.0.0" defer></script>
-    <script src="script.js?v=1.0.26" defer></script>
+    <script src="script.js?v=1.0.27" defer></script>
     <script>
       // Função temporária updateProgress até script.js carregar
       window.updateProgress =
@@ -3649,8 +3649,8 @@
 
         return `
         <section class="curtain-section" data-section="${section.key}">
-          <details class="curtain-drawer" ontoggle="syncCurtainDrawers(this)">
-                <summary class="curtain-drawer__summary" ${summaryStyle} aria-label="${section.name}">
+          <details class="curtain-drawer">
+                <summary class="curtain-drawer__summary" ${summaryStyle} aria-label="${section.name}" aria-expanded="false">
                     <span class="curtain-drawer__title">${section.name}</span>
                     <span class="curtain-drawer__chevron" aria-hidden="true"></span>
                 </summary>

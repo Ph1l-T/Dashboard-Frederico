@@ -1,11 +1,11 @@
-const CACHE_VERSION = "template-v1.0.20";
+const CACHE_VERSION = "template-v1.0.21";
 const CACHE_NAME = `eletrize-${CACHE_VERSION}`;
 const PRECACHE_ASSETS = [
   "/",
   "/index.html",
-  "/styles.css?v=1.0.46",
+  "/styles.css?v=1.0.47",
   "/routines.css?v=1.0.19",
-  "/script.js?v=1.0.26",
+  "/script.js?v=1.0.27",
   "/auth.js?v=1.0.0",
   "/access-control.js?v=1.0.1",
   "/config.js?v=1.0.21",

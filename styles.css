@@ -6668,15 +6668,21 @@ body.orchestrated-animation.reveal-home .room-card {
 }
 
 .curtain-drawer {
+  --curtain-drawer-content-padding-open: 14px;
+  --curtain-drawer-content-padding-closed: 0 14px;
   background: #141414cc;
   border: 1px solid #ffffff26;
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 10px 24px #00000033;
+  transition:
+    border-color 0.28s ease,
+    box-shadow 0.28s ease;
 }
 
-.curtain-drawer[open] {
+.curtain-drawer.is-open {
   border-color: #ffffff4d;
+  box-shadow: 0 16px 34px #0000004d;
 }
 
 .curtain-drawer__summary {
@@ -6755,13 +6761,8 @@ body.orchestrated-animation.reveal-home .room-card {
   width: 10px;
 }
 
-.curtain-drawer[open] .curtain-drawer__chevron {
+.curtain-drawer.is-open .curtain-drawer__chevron {
   transform: rotate(-135deg);
-}
-
-.curtain-drawer {
-  --curtain-drawer-content-padding-open: 14px;
-  --curtain-drawer-content-padding-closed: 0 14px;
 }
 
 .curtain-drawer__content {
@@ -6772,6 +6773,7 @@ body.orchestrated-animation.reveal-home .room-card {
   opacity: 0;
   overflow: hidden;
   padding: var(--curtain-drawer-content-padding-closed);
+  pointer-events: none;
   transform: translateY(-14px);
   transition:
     grid-template-rows 0.42s cubic-bezier(0.22, 1, 0.36, 1),
@@ -6779,18 +6781,15 @@ body.orchestrated-animation.reveal-home .room-card {
     transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
     padding 0.42s cubic-bezier(0.22, 1, 0.36, 1),
     border-color 0.3s ease;
+  will-change: grid-template-rows, opacity, transform;
 }
 
-.curtain-drawer:not([open]) > .curtain-drawer__content {
-  display: grid;
-  pointer-events: none;
-}
-
-.curtain-drawer[open] .curtain-drawer__content {
+.curtain-drawer.is-open .curtain-drawer__content {
   border-top-color: #ffffff1f;
   grid-template-rows: 1fr;
   opacity: 1;
   padding: var(--curtain-drawer-content-padding-open);
+  pointer-events: auto;
   transform: translateY(0);
 }
 
@@ -6807,7 +6806,7 @@ body.orchestrated-animation.reveal-home .room-card {
     transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.curtain-drawer[open] .curtain-section__grid {
+.curtain-drawer.is-open .curtain-section__grid {
   opacity: 1;
   transform: translateY(0);
 }
