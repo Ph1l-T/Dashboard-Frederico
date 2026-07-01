@@ -1,0 +1,929 @@
+[
+  {
+    "name": "LG AC IR GW8",
+    "label": "Home - AC LG",
+    "type": "LG AC IR GW8",
+    "id": "64",
+    "date": "2026-07-01T14:41:33+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Home",
+    "roomId": 1,
+    "capabilities": [
+      "Configuration",
+      "Actuator",
+      "Refresh",
+      "Initialize",
+      "Switch",
+      "Sensor"
+    ],
+    "attributes": {
+      "acMode": "OFF",
+      "dataType": "ENUM",
+      "values": ["on", "off"],
+      "lastHttpStatus": "INITIALIZED",
+      "lastCommand": "NONE",
+      "switch": "off"
+    },
+    "commands": [
+      { "command": "AC_lg_18" },
+      { "command": "AC_lg_19" },
+      { "command": "AC_lg_20" },
+      { "command": "AC_lg_21" },
+      { "command": "AC_lg_22" },
+      { "command": "AC_lg_23" },
+      { "command": "AC_lg_24" },
+      { "command": "AC_lg_25" },
+      { "command": "AC_lg_OFF" },
+      { "command": "AC_lg_ON" },
+      { "command": "AC_lg_swing_off" },
+      { "command": "AC_lg_swing_on" },
+      { "command": "configure" },
+      { "command": "initialize" },
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "LG AC IR GW8",
+    "label": "Cozinha - AC LG",
+    "type": "LG AC IR GW8",
+    "id": "65",
+    "date": "2026-07-01T14:42:29+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Cozinha",
+    "roomId": 11,
+    "capabilities": [
+      "Configuration",
+      "Actuator",
+      "Refresh",
+      "Initialize",
+      "Switch",
+      "Sensor"
+    ],
+    "attributes": {
+      "acMode": "OFF",
+      "dataType": "ENUM",
+      "values": ["on", "off"],
+      "lastHttpStatus": "INITIALIZED",
+      "lastCommand": "NONE",
+      "switch": "off"
+    },
+    "commands": [
+      { "command": "AC_lg_18" },
+      { "command": "AC_lg_19" },
+      { "command": "AC_lg_20" },
+      { "command": "AC_lg_21" },
+      { "command": "AC_lg_22" },
+      { "command": "AC_lg_23" },
+      { "command": "AC_lg_24" },
+      { "command": "AC_lg_25" },
+      { "command": "AC_lg_OFF" },
+      { "command": "AC_lg_ON" },
+      { "command": "AC_lg_swing_off" },
+      { "command": "AC_lg_swing_on" },
+      { "command": "configure" },
+      { "command": "initialize" },
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-01",
+    "label": "Spots Home",
+    "type": "Generic Component Switch",
+    "id": "6",
+    "date": "2026-07-01T14:45:29+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Home",
+    "roomId": 1,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-02",
+    "label": "Barra LED",
+    "type": "Generic Component Switch",
+    "id": "7",
+    "date": "2026-07-01T14:45:30+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Home",
+    "roomId": 1,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-03",
+    "label": "Sanca",
+    "type": "Generic Component Switch",
+    "id": "8",
+    "date": "2026-07-01T14:45:30+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Home",
+    "roomId": 1,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-04",
+    "label": "Spots Hall",
+    "type": "Generic Component Switch",
+    "id": "9",
+    "date": "2026-07-01T14:45:30+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-05",
+    "label": "Sanca NC (Living/Jantar)",
+    "type": "Generic Component Switch",
+    "id": "10",
+    "date": "2026-07-01T14:45:30+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-06",
+    "label": "Spots Parede",
+    "type": "Generic Component Switch",
+    "id": "11",
+    "date": "2026-07-01T14:45:31+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-07",
+    "label": "Spots Living",
+    "type": "Generic Component Switch",
+    "id": "12",
+    "date": "2026-07-01T14:45:31+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-08",
+    "label": "Spots Centrais",
+    "type": "Generic Component Switch",
+    "id": "13",
+    "date": "2026-07-01T14:45:31+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-09",
+    "label": "Spots Pilar",
+    "type": "Generic Component Switch",
+    "id": "14",
+    "date": "2026-07-01T14:45:31+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-10",
+    "label": "Spots M\u00f3vel",
+    "type": "Generic Component Switch",
+    "id": "15",
+    "date": "2026-07-01T14:45:31+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-11",
+    "label": "Spots Mesa",
+    "type": "Generic Component Switch",
+    "id": "16",
+    "date": "2026-07-01T14:45:32+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-12",
+    "label": "Spots Jantar",
+    "type": "Generic Component Switch",
+    "id": "17",
+    "date": "2026-07-01T14:45:32+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-13",
+    "label": "Sanca NC (Varanda)",
+    "type": "Generic Component Switch",
+    "id": "18",
+    "date": "2026-07-01T14:45:32+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Varanda",
+    "roomId": 3,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-14",
+    "label": "Spots Varanda",
+    "type": "Generic Component Switch",
+    "id": "19",
+    "date": "2026-07-01T14:45:32+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Varanda",
+    "roomId": 3,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-15",
+    "label": "Spots Centro",
+    "type": "Generic Component Switch",
+    "id": "20",
+    "date": "2026-07-01T14:45:32+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Varanda",
+    "roomId": 3,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 01 Switch-16",
+    "label": "Spots Gourmet",
+    "type": "Generic Component Switch",
+    "id": "21",
+    "date": "2026-07-01T14:45:33+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Varanda",
+    "roomId": 3,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Molsmart 02 Switch-01",
+    "label": "Spots Balc\u00e3o NC",
+    "type": "Generic Component Switch",
+    "id": "23",
+    "date": "2026-07-01T14:45:40+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Varanda",
+    "roomId": 3,
+    "capabilities": ["Actuator", "Switch", "Refresh"],
+    "attributes": {
+      "switch": "off",
+      "dataType": "ENUM",
+      "values": ["on", "off"]
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "Dimmer 01 CH-1",
+    "label": "Spots Balc\u00e3o Dimmer (Varanda)",
+    "type": "Generic Component Dimmer",
+    "id": "42",
+    "date": "2026-07-01T14:53:46+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Varanda",
+    "roomId": 3,
+    "capabilities": [
+      "Actuator",
+      "Refresh",
+      "ChangeLevel",
+      "SwitchLevel",
+      "Light",
+      "Switch"
+    ],
+    "attributes": {
+      "switch": "off",
+      "dataType": "NUMBER",
+      "values": null,
+      "level": "0"
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" },
+      { "command": "setLevel" },
+      { "command": "startLevelChange" },
+      { "command": "stopLevelChange" }
+    ]
+  },
+  {
+    "name": "Dimmer 01 CH-2",
+    "label": "Spots Dimmer (Varanda)",
+    "type": "Generic Component Dimmer",
+    "id": "43",
+    "date": "2026-07-01T14:53:46+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Varanda",
+    "roomId": 3,
+    "capabilities": [
+      "Actuator",
+      "Refresh",
+      "ChangeLevel",
+      "SwitchLevel",
+      "Light",
+      "Switch"
+    ],
+    "attributes": {
+      "switch": "off",
+      "dataType": "NUMBER",
+      "values": null,
+      "level": "0"
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" },
+      { "command": "setLevel" },
+      { "command": "startLevelChange" },
+      { "command": "stopLevelChange" }
+    ]
+  },
+  {
+    "name": "Dimmer 01 CH-3",
+    "label": "Spots Centro Dimmer (Varanda)",
+    "type": "Generic Component Dimmer",
+    "id": "44",
+    "date": "2026-07-01T14:53:47+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Varanda",
+    "roomId": 3,
+    "capabilities": [
+      "Actuator",
+      "Refresh",
+      "ChangeLevel",
+      "SwitchLevel",
+      "Light",
+      "Switch"
+    ],
+    "attributes": {
+      "switch": "off",
+      "dataType": "NUMBER",
+      "values": null,
+      "level": "0"
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" },
+      { "command": "setLevel" },
+      { "command": "startLevelChange" },
+      { "command": "stopLevelChange" }
+    ]
+  },
+  {
+    "name": "Dimmer 01 CH-4",
+    "label": "Spots Dimmer (Living/Jantar)",
+    "type": "Generic Component Dimmer",
+    "id": "45",
+    "date": "2026-07-01T14:53:47+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": [
+      "Actuator",
+      "Refresh",
+      "ChangeLevel",
+      "SwitchLevel",
+      "Light",
+      "Switch"
+    ],
+    "attributes": {
+      "switch": "off",
+      "dataType": "NUMBER",
+      "values": null,
+      "level": "0"
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" },
+      { "command": "setLevel" },
+      { "command": "startLevelChange" },
+      { "command": "stopLevelChange" }
+    ]
+  },
+  {
+    "name": "Dimmer 01 CH-5",
+    "label": "Spots Centro Dimmer (Living/Jantar)",
+    "type": "Generic Component Dimmer",
+    "id": "46",
+    "date": "2026-07-01T14:53:47+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": [
+      "Actuator",
+      "Refresh",
+      "ChangeLevel",
+      "SwitchLevel",
+      "Light",
+      "Switch"
+    ],
+    "attributes": {
+      "switch": "off",
+      "dataType": "NUMBER",
+      "values": null,
+      "level": "0"
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" },
+      { "command": "setLevel" },
+      { "command": "startLevelChange" },
+      { "command": "stopLevelChange" }
+    ]
+  },
+  {
+    "name": "Dimmer 01 CH-6",
+    "label": "Lustre Dimmer",
+    "type": "Generic Component Dimmer",
+    "id": "47",
+    "date": "2026-07-01T14:53:47+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Living/Jantar",
+    "roomId": 2,
+    "capabilities": [
+      "Actuator",
+      "Refresh",
+      "ChangeLevel",
+      "SwitchLevel",
+      "Light",
+      "Switch"
+    ],
+    "attributes": {
+      "switch": "off",
+      "dataType": "NUMBER",
+      "values": null,
+      "level": "0"
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" },
+      { "command": "setLevel" },
+      { "command": "startLevelChange" },
+      { "command": "stopLevelChange" }
+    ]
+  },
+  {
+    "name": "Dimmer 01 CH-8",
+    "label": "Dimmer 01 CH-8",
+    "type": "Generic Component Dimmer",
+    "id": "49",
+    "date": "2026-07-01T14:46:12+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": null,
+    "roomId": null,
+    "capabilities": [
+      "Actuator",
+      "Refresh",
+      "ChangeLevel",
+      "SwitchLevel",
+      "Light",
+      "Switch"
+    ],
+    "attributes": {
+      "switch": "off",
+      "dataType": "NUMBER",
+      "values": null,
+      "level": null
+    },
+    "commands": [
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" },
+      { "command": "setLevel" },
+      { "command": "startLevelChange" },
+      { "command": "stopLevelChange" }
+    ]
+  },
+  {
+    "name": "LG AC IR GW8",
+    "label": "Su\u00edte I - AC LG (Carol)",
+    "type": "LG AC IR GW8",
+    "id": "59",
+    "date": "2026-07-01T18:00:32+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Su\u00edte I",
+    "roomId": 4,
+    "capabilities": [
+      "Configuration",
+      "Actuator",
+      "Refresh",
+      "Initialize",
+      "Switch",
+      "Sensor"
+    ],
+    "attributes": {
+      "acMode": "OFF",
+      "dataType": "ENUM",
+      "values": ["on", "off"],
+      "lastHttpStatus": "HTTP 200 POST",
+      "lastCommand": "AC_lg_OFF",
+      "switch": "off"
+    },
+    "commands": [
+      { "command": "AC_lg_18" },
+      { "command": "AC_lg_19" },
+      { "command": "AC_lg_20" },
+      { "command": "AC_lg_21" },
+      { "command": "AC_lg_22" },
+      { "command": "AC_lg_23" },
+      { "command": "AC_lg_24" },
+      { "command": "AC_lg_25" },
+      { "command": "AC_lg_OFF" },
+      { "command": "AC_lg_ON" },
+      { "command": "AC_lg_swing_off" },
+      { "command": "AC_lg_swing_on" },
+      { "command": "configure" },
+      { "command": "initialize" },
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "LG AC IR GW8",
+    "label": "Su\u00edte II - AC LG",
+    "type": "LG AC IR GW8",
+    "id": "60",
+    "date": "2026-07-01T14:53:43+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Su\u00edte II",
+    "roomId": 5,
+    "capabilities": [
+      "Configuration",
+      "Actuator",
+      "Refresh",
+      "Initialize",
+      "Switch",
+      "Sensor"
+    ],
+    "attributes": {
+      "acMode": "OFF",
+      "dataType": "ENUM",
+      "values": ["on", "off"],
+      "lastHttpStatus": "INITIALIZED",
+      "lastCommand": "AC_lg_OFF",
+      "switch": "off"
+    },
+    "commands": [
+      { "command": "AC_lg_18" },
+      { "command": "AC_lg_19" },
+      { "command": "AC_lg_20" },
+      { "command": "AC_lg_21" },
+      { "command": "AC_lg_22" },
+      { "command": "AC_lg_23" },
+      { "command": "AC_lg_24" },
+      { "command": "AC_lg_25" },
+      { "command": "AC_lg_OFF" },
+      { "command": "AC_lg_ON" },
+      { "command": "AC_lg_swing_off" },
+      { "command": "AC_lg_swing_on" },
+      { "command": "configure" },
+      { "command": "initialize" },
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "LG AC IR GW8",
+    "label": "Su\u00edte Master - AC LG",
+    "type": "LG AC IR GW8",
+    "id": "61",
+    "date": "2026-07-01T14:31:16+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Su\u00edte Master",
+    "roomId": 7,
+    "capabilities": [
+      "Configuration",
+      "Actuator",
+      "Refresh",
+      "Initialize",
+      "Switch",
+      "Sensor"
+    ],
+    "attributes": {
+      "acMode": "OFF",
+      "dataType": "ENUM",
+      "values": ["on", "off"],
+      "lastHttpStatus": "INITIALIZED",
+      "lastCommand": "NONE",
+      "switch": "off"
+    },
+    "commands": [
+      { "command": "AC_lg_18" },
+      { "command": "AC_lg_19" },
+      { "command": "AC_lg_20" },
+      { "command": "AC_lg_21" },
+      { "command": "AC_lg_22" },
+      { "command": "AC_lg_23" },
+      { "command": "AC_lg_24" },
+      { "command": "AC_lg_25" },
+      { "command": "AC_lg_OFF" },
+      { "command": "AC_lg_ON" },
+      { "command": "AC_lg_swing_off" },
+      { "command": "AC_lg_swing_on" },
+      { "command": "configure" },
+      { "command": "initialize" },
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "LG AC IR GW8",
+    "label": "Su\u00edte Master - AC LG (Closet)",
+    "type": "LG AC IR GW8",
+    "id": "62",
+    "date": "2026-07-01T14:32:51+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Su\u00edte Master",
+    "roomId": 7,
+    "capabilities": [
+      "Configuration",
+      "Actuator",
+      "Refresh",
+      "Initialize",
+      "Switch",
+      "Sensor"
+    ],
+    "attributes": {
+      "acMode": "OFF",
+      "dataType": "ENUM",
+      "values": ["on", "off"],
+      "lastHttpStatus": "INITIALIZED",
+      "lastCommand": "NONE",
+      "switch": "off"
+    },
+    "commands": [
+      { "command": "AC_lg_18" },
+      { "command": "AC_lg_19" },
+      { "command": "AC_lg_20" },
+      { "command": "AC_lg_21" },
+      { "command": "AC_lg_22" },
+      { "command": "AC_lg_23" },
+      { "command": "AC_lg_24" },
+      { "command": "AC_lg_25" },
+      { "command": "AC_lg_OFF" },
+      { "command": "AC_lg_ON" },
+      { "command": "AC_lg_swing_off" },
+      { "command": "AC_lg_swing_on" },
+      { "command": "configure" },
+      { "command": "initialize" },
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  },
+  {
+    "name": "LG AC IR GW8",
+    "label": "Escrit\u00f3rio - AC LG",
+    "type": "LG AC IR GW8",
+    "id": "63",
+    "date": "2026-07-01T14:40:35+0000",
+    "model": null,
+    "manufacturer": null,
+    "room": "Escrit\u00f3rio",
+    "roomId": 8,
+    "capabilities": [
+      "Configuration",
+      "Actuator",
+      "Refresh",
+      "Initialize",
+      "Switch",
+      "Sensor"
+    ],
+    "attributes": {
+      "acMode": "OFF",
+      "dataType": "ENUM",
+      "values": ["on", "off"],
+      "lastHttpStatus": "INITIALIZED",
+      "lastCommand": "NONE",
+      "switch": "off"
+    },
+    "commands": [
+      { "command": "AC_lg_18" },
+      { "command": "AC_lg_19" },
+      { "command": "AC_lg_20" },
+      { "command": "AC_lg_21" },
+      { "command": "AC_lg_22" },
+      { "command": "AC_lg_23" },
+      { "command": "AC_lg_24" },
+      { "command": "AC_lg_25" },
+      { "command": "AC_lg_OFF" },
+      { "command": "AC_lg_ON" },
+      { "command": "AC_lg_swing_off" },
+      { "command": "AC_lg_swing_on" },
+      { "command": "configure" },
+      { "command": "initialize" },
+      { "command": "off" },
+      { "command": "on" },
+      { "command": "refresh" }
+    ]
+  }
+]

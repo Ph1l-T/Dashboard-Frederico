@@ -1,8 +1,8 @@
 ﻿{
-    "name":  "Dashboard Cliente",
-    "short_name":  "Dashboard",
-    "version":  "2025.01.23.001",
-    "start_url":  "./index.html?v=1737455925",
+    "name":  "Dashboard Frederico",
+    "short_name":  "Frederico",
+    "version":  "2026.06.02.001",
+    "start_url":  "./index.html?v=20260602001",
     "scope":  "./",
     "display":  "standalone",
     "background_color":  "#101010",

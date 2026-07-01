@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
-    <title>Dashboard Cliente</title>
+    <title>Dashboard Frederico</title>
     <style>
       /* Raleway Font - embutido */
       @font-face {
@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="styles.css?v=1.0.47" />
     <link rel="stylesheet" href="main-home.css?v=1.0.0" />
     <link rel="stylesheet" href="routines.css?v=1.0.19" />
-    <script src="config.js?v=1.0.21"></script>
+    <script src="config.js?v=frederico-1.0.6"></script>
     <link rel="icon" href="images/pwa/app-icon-192.png" type="image/png" />
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#1C1C1C" />
@@ -450,7 +450,7 @@
     <script src="auth.js?v=1.0.0" defer></script>
     <script src="access-control.js?v=1.0.1" defer></script>
     <script src="main-home.js?v=1.0.0" defer></script>
-    <script src="script.js?v=1.0.27" defer></script>
+    <script src="script.js?v=1.0.28" defer></script>
     <script>
       // Função temporária updateProgress até script.js carregar
       window.updateProgress =
@@ -2065,28 +2065,78 @@
         const deviceId = controlId;
         const isClaroTv = typeKey === "clarotv";
         const isRoku = typeKey === "roku";
+        const isTvControl = typeKey === "tv";
         const useClaroLayout = isClaroTv || isRoku;
         const layoutTypeKey = useClaroLayout ? "clarotv" : typeKey;
         const isBluray = typeKey === "bluray";
         const isMusicPage = /m\u00fasica/i.test(String(headingLabel || ""));
         const isPortraitEnabled = !isMusicPage;
+        const tvBrandKey = isTvControl
+          ? String(device.brand || "default").trim().toLowerCase()
+          : "";
+        const televisionBrands =
+          CLIENT_CONFIG?.devices?.televisionBrands || {};
+        const tvBrandProfile =
+          (tvBrandKey && televisionBrands[tvBrandKey]) ||
+          televisionBrands.default ||
+          {};
+        const tvBrandCommands = tvBrandProfile.commands || {};
+        const tvBrandCapabilities = tvBrandProfile.capabilities || {};
+        const tvCommandFor = (key, fallback) =>
+          String(tvBrandCommands[key] || fallback);
         const powerOnLabel = useClaroLayout ? "On" : "ON";
         const powerOffLabel = useClaroLayout ? "Off" : "OFF";
-        const directionalCenterCommand = isRoku ? "cursorOK" : "cursorCenter";
+        const directionalUpCommand = isTvControl
+          ? tvCommandFor("cursorUp", "cursorUp")
+          : "cursorUp";
+        const directionalDownCommand = isTvControl
+          ? tvCommandFor("cursorDown", "cursorDown")
+          : "cursorDown";
+        const directionalLeftCommand = isTvControl
+          ? tvCommandFor("cursorLeft", "cursorLeft")
+          : "cursorLeft";
+        const directionalRightCommand = isTvControl
+          ? tvCommandFor("cursorRight", "cursorRight")
+          : "cursorRight";
+        const directionalCenterCommand = isRoku
+          ? "cursorOK"
+          : isTvControl
+            ? tvCommandFor("cursorCenter", "cursorCenter")
+            : "cursorCenter";
         const portraitSecondaryPanelLabel = isRoku
           ? "Atalhos"
           : "N&uacute;meros";
-        const isTvControl = typeKey === "tv";
         const powerOnCommand = useClaroLayout
           ? "on"
           : isTvControl
-            ? "powerOn"
+            ? tvCommandFor("powerOn", "powerOn")
             : "on";
         const powerOffCommand = useClaroLayout
           ? "off"
           : isTvControl
-            ? "powerOff"
+            ? tvCommandFor("powerOff", "powerOff")
             : "off";
+        const configuredTvCommandButtons = Array.isArray(
+          tvBrandProfile.commandButtons,
+        )
+          ? tvBrandProfile.commandButtons
+          : [];
+        const brandTvCommandsMarkup = configuredTvCommandButtons
+          .map((button) => {
+            const command = tvCommandFor(
+              button?.commandKey,
+              button?.command || "",
+            );
+            const label = String(button?.label || button?.commandKey || command);
+            const icon = String(button?.icon || "");
+            if (!command) return "";
+            return `
+                    <button class="tv-btn tv-btn--icon-only" onclick="tvCommand(this, '${command}')" data-device-id="${deviceId}" aria-label="${label}">
+                      ${icon ? `<img src="${icon}" alt="${label}">` : label}
+                    </button>
+                  `;
+          })
+          .join("");
         const tvCommandsMarkup = `
                     <button class="tv-btn tv-btn--icon-only tv-btn--voltar" onclick="tvCommand(this, 'voltar')" data-device-id="${deviceId}" aria-label="Voltar">
                         <img src="images/icons/arrow-left.svg" alt="Voltar">
@@ -2207,8 +2257,25 @@
               : isBluray
                 ? blurayCommandsMarkup
                 : isTvControl
-                  ? tvCommandsMarkup
+                  ? brandTvCommandsMarkup || tvCommandsMarkup
                   : defaultCommandsMarkup;
+        const channelControlsMarkup =
+          isTvControl && tvBrandCapabilities.channelButtons
+            ? `
+                <header class="tv-section-header">
+                  <h3 class="tv-section-title">Canais</h3>
+                  <div class="tv-section-line"></div>
+                </header>
+                <div class="tv-control-group tv-media-grid">
+                  <button class="tv-btn-square" onclick="tvCommand(this, '${tvCommandFor("channelDown", "channelDown")}')" data-device-id="${deviceId}" aria-label="Canal anterior">
+                    <img src="images/icons/arrow-down.svg" alt="Canal anterior" class="tv-btn-icon-img">
+                  </button>
+                  <button class="tv-btn-square" onclick="tvCommand(this, '${tvCommandFor("channelUp", "channelUp")}')" data-device-id="${deviceId}" aria-label="Pr&oacute;ximo canal">
+                    <img src="images/icons/arrow-up.svg" alt="Pr&oacute;ximo canal" class="tv-btn-icon-img">
+                  </button>
+                </div>
+              `
+            : "";
         const numpadFooterMarkup = isClaroTv
           ? `
                         <button class="tv-numpad-btn tv-numpad-btn--icon" onclick="tvCommand(this, 'returnButton')" data-device-id="${deviceId}" aria-label="Voltar">
@@ -2228,7 +2295,10 @@
                             <img src="images/icons/icon-mouse.svg" alt="Mouse">
                         </button>
                 `;
-        const volumeControlMarkup = `
+        const volumeControlMarkup =
+          isTvControl && tvBrandCapabilities.volumeSlider === false
+            ? channelControlsMarkup
+            : `
                 <header class="tv-section-header">
                   <h3 class="tv-section-title">Volume</h3>
                   <span class="tv-volume-value" id="tv-volume-display">50</span>
@@ -2308,8 +2378,11 @@
             </button>
           `
           : "";
-        const mediaMarkup = isRoku
-          ? `
+        const mediaMarkup =
+          isTvControl && tvBrandCapabilities.media === false
+            ? ""
+            : isRoku
+              ? `
                 <div class="tv-control-section tv-control-section--media" data-portrait-section="media">
                     <header class="tv-section-header">
                         <h3 class="tv-section-title">M&iacute;dia</h3>
@@ -2328,8 +2401,8 @@
                     </div>
                 </div>
                 `
-          : isClaroTv
-            ? `
+              : isClaroTv
+                ? `
                 <div class="tv-control-section tv-control-section--media" data-portrait-section="media">
                     <header class="tv-section-header">
                         <h3 class="tv-section-title">M&iacute;dia</h3>
@@ -2351,9 +2424,9 @@
                     </div>
                 </div>
                 `
-            : isBluray
-              ? ""
-              : `
+                : isBluray
+                  ? ""
+                  : `
                 <div class="tv-control-section tv-control-section--media" data-portrait-section="media">
                     <header class="tv-section-header">
                         <h3 class="tv-section-title">M&iacute;dia</h3>
@@ -2408,7 +2481,41 @@
             </div>
           `
           : "";
-        const numbersSectionMarkup = isMusicPage
+        const tvNumbersSectionMarkup =
+          isTvControl && tvBrandCapabilities.numbers
+            ? `
+            <div class="tv-control-section" data-portrait-section="numbers">
+              <header class="tv-section-header">
+                <h3 class="tv-section-title">N&uacute;meros</h3>
+                <div class="tv-section-line"></div>
+              </header>
+              <div class="tv-control-group">
+                <div class="tv-numpad">
+                  <button class="tv-numpad-btn" onclick="tvCommand(this, '${tvCommandFor("num1", "num1")}')" data-device-id="${deviceId}" aria-label="1">1</button>
+                  <button class="tv-numpad-btn" onclick="tvCommand(this, '${tvCommandFor("num2", "num2")}')" data-device-id="${deviceId}" aria-label="2">2</button>
+                  <button class="tv-numpad-btn" onclick="tvCommand(this, '${tvCommandFor("num3", "num3")}')" data-device-id="${deviceId}" aria-label="3">3</button>
+                  <button class="tv-numpad-btn" onclick="tvCommand(this, '${tvCommandFor("num4", "num4")}')" data-device-id="${deviceId}" aria-label="4">4</button>
+                  <button class="tv-numpad-btn" onclick="tvCommand(this, '${tvCommandFor("num5", "num5")}')" data-device-id="${deviceId}" aria-label="5">5</button>
+                  <button class="tv-numpad-btn" onclick="tvCommand(this, '${tvCommandFor("num6", "num6")}')" data-device-id="${deviceId}" aria-label="6">6</button>
+                  <button class="tv-numpad-btn" onclick="tvCommand(this, '${tvCommandFor("num7", "num7")}')" data-device-id="${deviceId}" aria-label="7">7</button>
+                  <button class="tv-numpad-btn" onclick="tvCommand(this, '${tvCommandFor("num8", "num8")}')" data-device-id="${deviceId}" aria-label="8">8</button>
+                  <button class="tv-numpad-btn" onclick="tvCommand(this, '${tvCommandFor("num9", "num9")}')" data-device-id="${deviceId}" aria-label="9">9</button>
+                  <button class="tv-numpad-btn tv-numpad-btn--icon" onclick="tvCommand(this, '${tvCommandFor("return", "returnButton")}')" data-device-id="${deviceId}" aria-label="Voltar">
+                    <img src="images/icons/back-button.svg" alt="Voltar">
+                  </button>
+                  <button class="tv-numpad-btn" onclick="tvCommand(this, '${tvCommandFor("num0", "num0")}')" data-device-id="${deviceId}" aria-label="0">0</button>
+                  <div class="tv-numpad-btn tv-numpad-btn--icon tv-numpad-btn--static" aria-hidden="true">
+                    <img src="images/icons/icon-eletrize.svg" alt="Eletrize">
+                  </div>
+                </div>
+              </div>
+            </div>
+          `
+            : "";
+        const numbersSectionMarkup =
+          isTvControl && tvBrandCapabilities.numbers
+            ? `${commandsSectionMarkup}${tvNumbersSectionMarkup}`
+            : isMusicPage
           ? `
           <div class="tv-control-section tv-control-section--dpad" data-device-id="${deviceId}" data-control-mode="cursor" data-portrait-section="control">
             <header class="tv-section-header">
@@ -2430,21 +2537,21 @@
               </div>
               <div class="tv-directional-section">
                 <div class="tv-directional-pad">
-                  <button class="tv-directional-btn tv-directional-btn--up" onclick="tvCommand(this, 'cursorUp')" data-device-id="${deviceId}" aria-label="Cima">
+                  <button class="tv-directional-btn tv-directional-btn--up" onclick="tvCommand(this, '${directionalUpCommand}')" data-device-id="${deviceId}" aria-label="Cima">
                     <img src="images/icons/arrow-up.svg" alt="Cima" class="tv-btn-icon-img">
                   </button>
                   <div class="tv-directional-row-line">
-                    <button class="tv-directional-btn tv-directional-btn--left" onclick="tvCommand(this, 'cursorLeft')" data-device-id="${deviceId}" aria-label="Esquerda">
+                    <button class="tv-directional-btn tv-directional-btn--left" onclick="tvCommand(this, '${directionalLeftCommand}')" data-device-id="${deviceId}" aria-label="Esquerda">
                       <img src="images/icons/arrow-left.svg" alt="Esquerda" class="tv-btn-icon-img">
                     </button>
                     <button class="tv-directional-btn tv-directional-btn--ok" onclick="tvCommand(this, '${directionalCenterCommand}')" data-device-id="${deviceId}" aria-label="OK">
                       <div class="tv-ok-circle"></div>
                     </button>
-                    <button class="tv-directional-btn tv-directional-btn--right" onclick="tvCommand(this, 'cursorRight')" data-device-id="${deviceId}" aria-label="Direita">
+                    <button class="tv-directional-btn tv-directional-btn--right" onclick="tvCommand(this, '${directionalRightCommand}')" data-device-id="${deviceId}" aria-label="Direita">
                       <img src="images/icons/arrow-right.svg" alt="Direita" class="tv-btn-icon-img">
                     </button>
                   </div>
-                  <button class="tv-directional-btn tv-directional-btn--down" onclick="tvCommand(this, 'cursorDown')" data-device-id="${deviceId}" aria-label="Baixo">
+                  <button class="tv-directional-btn tv-directional-btn--down" onclick="tvCommand(this, '${directionalDownCommand}')" data-device-id="${deviceId}" aria-label="Baixo">
                     <img src="images/icons/arrow-down.svg" alt="Baixo" class="tv-btn-icon-img">
                   </button>
                 </div>
@@ -2604,7 +2711,8 @@
             <div class="tv-portrait-tabs" role="tablist" aria-label="Seções">
               <button class="tv-portrait-tab is-active" type="button" data-target="control" onclick="setTvPortraitPanel(this, 'control')" aria-pressed="true">Controle</button>
               <button class="tv-portrait-tab" type="button" data-target="commands" onclick="setTvPortraitPanel(this, 'commands')" aria-pressed="false">Comandos</button>
-              <button class="tv-portrait-tab" type="button" data-target="media" onclick="setTvPortraitPanel(this, 'media')" aria-pressed="false">M&iacute;dia</button>
+              ${tvBrandCapabilities.numbers ? `<button class="tv-portrait-tab" type="button" data-target="numbers" onclick="setTvPortraitPanel(this, 'numbers')" aria-pressed="false">N&uacute;meros</button>` : ""}
+              ${tvBrandCapabilities.media === false ? "" : `<button class="tv-portrait-tab" type="button" data-target="media" onclick="setTvPortraitPanel(this, 'media')" aria-pressed="false">M&iacute;dia</button>`}
             </div>
           `
                 : `
@@ -2667,7 +2775,7 @@
         <h1 class="page-title">${title}</h1>
     </div>
 
-    <div class="tv-control-wrapper" data-control-type="${layoutTypeKey}" data-device-type="${typeKey}"${isPortraitEnabled ? ' data-portrait-panel="control"' : ""}>
+    <div class="tv-control-wrapper" data-control-type="${layoutTypeKey}" data-device-type="${typeKey}" data-tv-brand="${tvBrandKey}" data-direct-mute="${tvBrandCapabilities.directMute === true}"${isPortraitEnabled ? ' data-portrait-panel="control"' : ""}>
         ${portraitTopMarkup}
         ${rokuPortraitFixedCommandsMarkup}
         ${portraitTabsMarkup}
@@ -2733,21 +2841,21 @@
                 </div>
                 <div class="tv-directional-section">
                   <div class="tv-directional-pad">
-                    <button class="tv-directional-btn tv-directional-btn--up" onclick="tvCommand(this, 'cursorUp')" data-device-id="${deviceId}" aria-label="Cima">
+                    <button class="tv-directional-btn tv-directional-btn--up" onclick="tvCommand(this, '${directionalUpCommand}')" data-device-id="${deviceId}" aria-label="Cima">
                       <img src="images/icons/arrow-up.svg" alt="Cima" class="tv-btn-icon-img">
                     </button>
                     <div class="tv-directional-row-line">
-                      <button class="tv-directional-btn tv-directional-btn--left" onclick="tvCommand(this, 'cursorLeft')" data-device-id="${deviceId}" aria-label="Esquerda">
+                      <button class="tv-directional-btn tv-directional-btn--left" onclick="tvCommand(this, '${directionalLeftCommand}')" data-device-id="${deviceId}" aria-label="Esquerda">
                         <img src="images/icons/arrow-left.svg" alt="Esquerda" class="tv-btn-icon-img">
                       </button>
                       <button class="tv-directional-btn tv-directional-btn--ok" onclick="tvCommand(this, '${directionalCenterCommand}')" data-device-id="${deviceId}" aria-label="OK">
                         <div class="tv-ok-circle"></div>
                       </button>
-                      <button class="tv-directional-btn tv-directional-btn--right" onclick="tvCommand(this, 'cursorRight')" data-device-id="${deviceId}" aria-label="Direita">
+                      <button class="tv-directional-btn tv-directional-btn--right" onclick="tvCommand(this, '${directionalRightCommand}')" data-device-id="${deviceId}" aria-label="Direita">
                         <img src="images/icons/arrow-right.svg" alt="Direita" class="tv-btn-icon-img">
                       </button>
                     </div>
-                    <button class="tv-directional-btn tv-directional-btn--down" onclick="tvCommand(this, 'cursorDown')" data-device-id="${deviceId}" aria-label="Baixo">
+                    <button class="tv-directional-btn tv-directional-btn--down" onclick="tvCommand(this, '${directionalDownCommand}')" data-device-id="${deviceId}" aria-label="Baixo">
                       <img src="images/icons/arrow-down.svg" alt="Baixo" class="tv-btn-icon-img">
                     </button>
                   </div>
@@ -2825,7 +2933,6 @@
         const transportId = String(device.transportId || device.id);
         const volumeId = String(device.volumeId || device.id);
         const powerId = String(device.powerId || device.id);
-        const controlId = String(device.controlId || device.id);
         const albumFallback = "images/images/music-placeholder.png";
 
         return `
@@ -2841,155 +2948,61 @@
     <h1 class="page-title">${envName}, M&uacute;sica</h1>
   </div>
 
-  <div class="music-control-wrapper tv-control-wrapper" data-control-type="music">
-  <div class="music-col music-col-1">
-    <section class="tv-control-section music-power-section">
-        <header class="tv-section-header">
-          <h3 class="tv-section-title">On / Off</h3>
-          <div class="tv-section-line"></div>
-        </header>
-        <div class="tv-control-group tv-power-group">
-          <button class="tv-btn tv-btn--power-on" id="music-master-on" aria-label="Ligar" aria-pressed="true" data-device-id="${powerId}">
-            ON
-          </button>
-          <button class="tv-btn tv-btn--power-off" id="music-master-off" aria-label="Desligar" aria-pressed="false" data-device-id="${powerId}">
-            OFF
-          </button>
-        </div>
-      </section>
-
-    <section class="tv-control-section tv-control-section--dpad music-dpad-section" data-device-id="${controlId}" data-control-mode="cursor">
-        <header class="tv-section-header">
-          <h3 class="tv-section-title">Controle</h3>
-          <div class="tv-section-line"></div>
-        </header>
-        <div class="tv-control-mode-toggle" role="tablist" aria-label="Modo de controle">
-          <span class="tv-control-mode-indicator" aria-hidden="true"></span>
-          <button class="tv-control-mode-btn is-active" type="button" data-mode="cursor" aria-pressed="true">Cursor</button>
-          <button class="tv-control-mode-btn" type="button" data-mode="gestures" aria-pressed="false">Gestos</button>
-        </div>
-        <div class="tv-control-group tv-directional-row">
-          <div class="tv-gesture-surface" aria-hidden="true"></div>
-          <div class="tv-gesture-icons" aria-hidden="true">
-            <img class="tv-gesture-icon tv-gesture-icon--up" src="images/icons/gesture-up.svg" alt="">
-            <img class="tv-gesture-icon tv-gesture-icon--left" src="images/icons/gesture-left.svg" alt="">
-            <img class="tv-gesture-icon tv-gesture-icon--right" src="images/icons/gesture-right.svg" alt="">
-            <img class="tv-gesture-icon tv-gesture-icon--down" src="images/icons/gesture-down.svg" alt="">
-          </div>
-          <div class="tv-directional-section">
-            <div class="tv-directional-pad">
-              <button class="tv-directional-btn tv-directional-btn--up" onclick="tvCommand(this, 'cursorUp')" data-device-id="${controlId}" aria-label="Cima">
-                <img src="images/icons/arrow-up.svg" alt="Cima" class="tv-btn-icon-img">
-              </button>
-              <div class="tv-directional-row-line">
-                <button class="tv-directional-btn tv-directional-btn--left" onclick="tvCommand(this, 'cursorLeft')" data-device-id="${controlId}" aria-label="Esquerda">
-                  <img src="images/icons/arrow-left.svg" alt="Esquerda" class="tv-btn-icon-img">
-                </button>
-                <button class="tv-directional-btn tv-directional-btn--ok" onclick="tvCommand(this, 'cursorCenter')" data-device-id="${controlId}" aria-label="OK">
-                  <div class="tv-ok-circle"></div>
-                </button>
-                <button class="tv-directional-btn tv-directional-btn--right" onclick="tvCommand(this, 'cursorRight')" data-device-id="${controlId}" aria-label="Direita">
-                  <img src="images/icons/arrow-right.svg" alt="Direita" class="tv-btn-icon-img">
-                </button>
-              </div>
-              <button class="tv-directional-btn tv-directional-btn--down" onclick="tvCommand(this, 'cursorDown')" data-device-id="${controlId}" aria-label="Baixo">
-                <img src="images/icons/arrow-down.svg" alt="Baixo" class="tv-btn-icon-img">
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-  </div>
-
-  <div class="music-col music-col-2">
-    <section class="tv-control-section music-commands-section">
-        <header class="tv-section-header">
-          <h3 class="tv-section-title">Comandos</h3>
-          <div class="tv-section-line"></div>
-        </header>
-        <div class="music-mode-grid">
-          <button class="tv-btn tv-btn--icon-only" onclick="tvCommand(this, 'info')" data-device-id="${controlId}" aria-label="Info">
-            <img src="images/icons/icon-info.svg" alt="Info">
-          </button>
-          <button class="tv-btn tv-btn--icon-only" onclick="tvCommand(this, 'options')" data-device-id="${controlId}" aria-label="Options">
-            <img src="images/icons/icon-config.svg" alt="Options">
-          </button>
-          <button class="tv-btn tv-btn--icon-only" onclick="tvCommand(this, 'music')" data-device-id="${transportId}" aria-label="M&uacute;sica">
-            <img src="images/icons/icon-musica.svg" alt="M&uacute;sica">
-          </button>
-          <button class="tv-btn tv-btn--icon-only" onclick="tvCommand(this, 'movie')" data-device-id="${transportId}" aria-label="Filme">
-            <img src="images/icons/icon-scenes.svg" alt="Filme">
-          </button>
-        </div>
-      </section>
-
-    <section class="tv-control-section music-volume-section" data-device-id="${volumeId}">
-        <span id="music-volume-display" class="sr-only">50</span>
-        <div class="music-volume-body">
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value="50"
-            class="music-volume-slider music-volume-slider--vertical"
-            id="music-volume-slider"
-            aria-label="Volume"
-            aria-orientation="vertical"
-            orient="vertical"
-            data-device-id="${volumeId}"
-          >
-        </div>
-        <button class="music-volume-mute-btn" id="music-mute" aria-label="Mute" aria-pressed="false" data-device-id="${volumeId}">
-          <img src="images/icons/icon-sound-high.svg" alt="Volume alto" class="volume-icon-high">
-          <img src="images/icons/icon-sound-low.svg" alt="Volume baixo" class="volume-icon-low">
-          <img src="images/icons/icon-sound-mute.svg" alt="Mudo" class="volume-icon-muted" style="display:none;">
+  <main class="music-reset-layout" data-control-type="music">
+    <section class="music-reset-power" aria-label="On e Off">
+      <div class="music-reset-power-grid">
+        <button class="music-reset-power-btn music-reset-power-btn--on" id="music-master-on" type="button" aria-label="Ligar" aria-pressed="true" data-device-id="${powerId}">
+          On
         </button>
-      </section>
-  </div>
-<div class="music-col music-col-3">
-      <section class="tv-control-section music-now-section music-player-card" data-metadata-device-id="${metadataId}">
-        <header class="tv-section-header">
-          <h3 class="tv-section-title">M&uacute;sica</h3>
-          <div class="tv-section-line"></div>
-        </header>
-        <div class="music-player-inner">
-          <div class="music-album">
-            <img class="music-album-img" src="${albumFallback}" alt="Capa do &aacute;lbum" loading="lazy" decoding="async" width="720" height="720">
-          </div>
-          <div class="music-info">
-            <div class="music-track">
-              <div class="music-track-marquee">
-                <div class="music-track-marquee__inner">
-                  <span class="music-track-marquee__text" id="music-track">Nome da M&uacute;sica</span>
-                  <span class="music-track-marquee__text music-track-marquee__text--clone" aria-hidden="true"></span>
-                </div>
-              </div>
-            </div>
-            <div class="music-artist" id="music-artist">Nome do Artista</div>
-          </div>
-        </div>
-      </section>
+        <button class="music-reset-power-btn music-reset-power-btn--off" id="music-master-off" type="button" aria-label="Desligar" aria-pressed="false" data-device-id="${powerId}">
+          Off
+        </button>
+      </div>
+    </section>
 
-      <section class="tv-control-section music-media-section">
-        <header class="tv-section-header">
-          <h3 class="tv-section-title">M&iacute;dia</h3>
-          <div class="tv-section-line"></div>
-        </header>
-        <div class="music-transport-grid">
-          <button class="tv-btn tv-btn--icon-only" id="music-prev" aria-label="Anterior" data-device-id="${transportId}">
-            <img src="images/icons/icon-previous-track.svg" alt="Anterior">
-          </button>
-          <button class="tv-btn tv-btn--icon-only music-play-toggle" id="music-play-toggle" aria-label="Tocar" aria-pressed="false" data-device-id="${transportId}">
-            <img src="images/icons/icon-play.svg" alt="Play" class="music-play-toggle__icon music-play-toggle__icon--play">
-            <img src="images/icons/icon-pause.svg" alt="Pause" class="music-play-toggle__icon music-play-toggle__icon--pause">
-          </button>
-          <button class="tv-btn tv-btn--icon-only" id="music-next" aria-label="Pr&oacute;ximo" data-device-id="${transportId}">
-            <img src="images/icons/icon-next-track.svg" alt="Pr&oacute;ximo">
-          </button>
+    <section class="music-reset-now" data-metadata-device-id="${metadataId}">
+      <div class="music-player-inner music-reset-now-inner">
+        <div class="music-reset-album">
+          <img class="music-album-img" src="${albumFallback}" alt="Capa do &aacute;lbum" loading="lazy" decoding="async" width="720" height="720">
         </div>
-      </section>
-    </div>
-  </div>
+        <div class="music-reset-info">
+          <div class="music-reset-track" id="music-track">Nome da M&uacute;sica</div>
+          <div class="music-reset-artist" id="music-artist">Nome do Artista</div>
+          <div class="music-reset-transport" aria-label="Controles da m&uacute;sica">
+            <button class="music-reset-icon-btn" id="music-prev" type="button" aria-label="Anterior" data-device-id="${transportId}">
+              <img src="images/icons/icon-previous-track.svg" alt="">
+            </button>
+            <button class="music-reset-icon-btn music-reset-icon-btn--primary music-play-toggle" id="music-play-toggle" type="button" aria-label="Tocar" aria-pressed="false" data-device-id="${transportId}">
+              <img src="images/icons/icon-play.svg" alt="" class="music-play-toggle__icon music-play-toggle__icon--play">
+              <img src="images/icons/icon-pause.svg" alt="" class="music-play-toggle__icon music-play-toggle__icon--pause">
+            </button>
+            <button class="music-reset-icon-btn" id="music-next" type="button" aria-label="Pr&oacute;ximo" data-device-id="${transportId}">
+              <img src="images/icons/icon-next-track.svg" alt="">
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="music-reset-volume music-volume-section" aria-label="Volume da m&uacute;sica" data-device-id="${volumeId}">
+      <button class="music-reset-mute-btn" id="music-mute" type="button" aria-label="Zerar volume" aria-pressed="false" data-device-id="${volumeId}" data-mute-mode="zero">
+        <img src="images/icons/icon-sound-high.svg" alt="" class="volume-icon-high">
+        <img src="images/icons/icon-sound-low.svg" alt="" class="volume-icon-low">
+        <img src="images/icons/icon-sound-mute.svg" alt="" class="volume-icon-muted">
+      </button>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value="50"
+        class="music-volume-slider music-reset-volume-slider"
+        id="music-volume-slider"
+        aria-label="Volume"
+        data-device-id="${volumeId}"
+      >
+      <span id="music-volume-display" class="sr-only">50</span>
+    </section>
+  </main>
 
 </div>
 
@@ -3049,7 +3062,7 @@
           } else {
             const zoneButtons = zones
               .map((zone, index) => {
-                const label = String(index + 1);
+                const label = zone.name || `Zona ${index + 1}`;
                 const ariaLabel = zone.name || `Zona ${index + 1}`;
                 const deviceId =
                   acDeviceId || (zone.deviceId ? String(zone.deviceId) : "");
@@ -3224,8 +3237,6 @@
             const hasAC =
               env?.airConditioner !== null && env?.airConditioner !== undefined;
             const hasMusic =
-              envKey !== "ambiente1" &&
-              envKey !== "ambiente3" &&
               Array.isArray(env?.music) &&
               env.music.length > 0;
             const hasTV = Array.isArray(env?.tv) && env.tv.length > 0;
@@ -3238,9 +3249,7 @@
               Array.isArray(env?.clarotv) && env.clarotv.length > 0;
             const hasRoku = Array.isArray(env?.roku) && env.roku.length > 0;
             const hasGames =
-              envKey !== "ambiente3" &&
-              Array.isArray(env?.games) &&
-              env.games.length > 0;
+              Array.isArray(env?.games) && env.games.length > 0;
             const hasHidro =
               Array.isArray(env?.hidromassagem) && env.hidromassagem.length > 0;
 
@@ -5542,6 +5551,9 @@
         "ambiente8-htv",
         "ambiente9-tv",
         "ambiente9-htv",
+        "ambiente3-piscina-luzes",
+        "ambiente3-piscina",
+        "ambiente3-telao",
       ];
 
       LEGACY_CONFIG_ROUTES.forEach((route) => {
@@ -6114,7 +6126,7 @@
               titleEl?.dataset?.splitTitle || titleEl?.textContent || "";
             if (titleEl && rawTitle) {
               applyPageTitleLayout(titleEl, rawTitle);
-              document.title = rawTitle + " | Dashboard Cliente";
+              document.title = rawTitle + " | Dashboard Frederico";
             }
           }
         }

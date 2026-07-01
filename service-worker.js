@@ -1,14 +1,14 @@
-const CACHE_VERSION = "template-v1.0.21";
+const CACHE_VERSION = "frederico-v1.0.6";
 const CACHE_NAME = `eletrize-${CACHE_VERSION}`;
 const PRECACHE_ASSETS = [
   "/",
   "/index.html",
   "/styles.css?v=1.0.47",
   "/routines.css?v=1.0.19",
-  "/script.js?v=1.0.27",
+  "/script.js?v=1.0.28",
   "/auth.js?v=1.0.0",
   "/access-control.js?v=1.0.1",
-  "/config.js?v=1.0.21",
+  "/config.js?v=frederico-1.0.6",
   "/fonts-raleway.css",
   "/manifest.json",
   "/images/pwa/app-icon-192.png",

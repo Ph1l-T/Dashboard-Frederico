@@ -1,0 +1,216 @@
+/**
+ *  TV LG IR - MolSmart GW3 Driver - IR(SendIR) para TV LG
+ *
+ *  Comandos: Power, Canal, Menu, Mute, Home, Cursor, Números, HDMI2
+ */
+
+metadata {
+  definition (name: "TV LG IR", namespace: "Eletrize", author: "PH", vid: "generic-contact") {
+    capability "Switch"           // usa ON/OFF como switch
+    capability "Sensor"
+    capability "Actuator"
+    capability "Configuration"
+    capability "Refresh"
+    capability "PushableButton"   // para mapear botões extras, se quiser
+
+    attribute "tvCommand", "STRING"
+
+    command "commandON"
+    command "commandOFF"
+    command "chUp"
+    command "chDown"
+    command "tvReturn"
+    command "menu"
+    command "mute"
+    command "home"
+    command "cursorUp"
+    command "cursorDown"
+    command "cursorLeft"
+    command "cursorRight"
+    command "cursorOK"
+    command "num0"
+    command "num1"
+    command "num2"
+    command "num3"
+    command "num4"
+    command "num5"
+    command "num6"
+    command "num7"
+    command "num8"
+    command "num9"
+    command "hdmi2"
+  }
+}
+
+import groovy.transform.Field
+@Field static final String DRIVER = "TV LG IR - by PH - Versão com IR Embutido"
+
+// Códigos IR embutidos para TV LG
+@Field static final Map IR_CODES = [
+  'ON'        : '38000,1,69,343,172,21,21,21,21,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,64,21,21,21,64,21,64,21,64,21,64,21,64,21,21,21,21,21,64,21,21,21,21,21,21,21,64,21,64,21,64,21,64,21,21,21,64,21,64,21,64,21,21,21,21,21,1673,343,86,21,3732',
+  'OFF'       : '38000,1,69,343,172,21,22,21,22,21,65,21,22,21,22,21,22,21,22,21,22,21,65,21,65,21,22,21,65,21,65,21,65,21,65,21,65,21,65,21,22,21,65,21,22,21,22,21,22,21,65,21,65,21,22,21,65,21,22,21,65,21,65,21,65,21,22,21,22,21,1673,343,86,21,3732',
+  'CH_UP'     : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,65,21,65,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'CH_DOWN'   : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,65,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'RETURN'    : '38000,1,1,344,171,21,21,21,21,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,64,21,21,21,64,21,64,21,64,21,64,21,64,21,21,21,21,21,21,21,64,21,21,21,64,21,21,21,21,21,64,21,64,21,64,21,21,21,64,21,21,21,64,21,64,21,1525,344,86,21,3682,344,86,21,2000',
+  'MENU'      : '38000,1,69,347,173,22,22,22,22,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,65,22,22,22,65,22,65,22,65,22,65,22,65,22,65,22,65,22,22,22,22,22,22,22,22,22,65,22,22,22,22,22,22,22,65,22,65,22,65,22,65,22,22,22,65,22,1527,347,87,22,3692',
+  'MUTE'      : '38000,1,69,340,169,20,20,20,20,20,64,20,20,20,20,20,20,20,20,20,20,20,64,20,64,20,20,20,64,20,64,20,64,20,64,20,64,20,64,20,20,20,20,20,64,20,20,20,20,20,20,20,20,20,20,20,64,20,64,20,20,20,64,20,64,20,64,20,64,20,1544,340,85,20,3663',
+  'HOME'      : '38000,1,1,344,172,21,21,21,21,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,64,21,21,21,64,21,64,21,64,21,64,21,64,21,22,21,21,21,64,21,64,21,64,21,64,21,64,21,21,21,64,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,1526,344,86,21,2000',
+  'CUR_UP'    : '38000,1,1,344,171,21,21,21,21,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,64,21,21,21,64,21,64,21,64,21,64,21,64,21,21,21,21,21,21,21,21,21,21,21,21,21,64,21,21,21,64,21,64,21,64,21,64,21,64,21,64,21,21,21,64,21,1527,344,86,21,2000',
+  'CUR_LEFT'  : '38000,1,1,344,171,21,21,21,21,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,64,21,21,21,64,21,64,21,64,21,64,21,64,21,64,21,64,21,64,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,64,21,64,21,64,21,64,21,64,21,1527,344,86,21,2000',
+  'CUR_RIGHT' : '38000,1,1,344,171,21,21,21,21,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,64,21,21,21,64,21,64,21,64,21,64,21,64,21,21,21,64,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,21,21,21,21,64,21,64,21,64,21,64,21,64,21,1526,344,86,21,2000',
+  'CUR_OK'    : '38000,1,1,344,171,21,21,21,21,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,64,21,21,21,64,21,64,21,64,21,64,21,64,21,21,21,21,21,64,21,21,21,21,21,21,21,64,21,21,21,64,21,64,21,21,21,64,21,64,21,64,21,21,21,64,21,1525,344,86,21,2000',
+  'CUR_DOWN'  : '38000,1,1,344,171,21,21,21,21,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,64,21,21,21,64,21,64,21,64,21,64,21,64,21,64,21,21,21,21,21,21,21,21,21,21,21,64,21,21,21,21,21,64,21,64,21,64,21,64,21,64,21,21,21,64,21,1525,344,86,21,3682,344,86,21,2000',
+  'NUM_0'     : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,65,21,21,21,21,21,21,21,65,21,65,21,65,21,65,21,21,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'NUM_1'     : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,65,21,21,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,21,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'NUM_2'     : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,21,21,65,21,21,21,21,21,65,21,21,21,21,21,21,21,65,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'NUM_3'     : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,65,21,65,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'NUM_4'     : '38000,1,69,341,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,21,21,21,21,65,21,21,21,65,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,21,21,65,21,65,21,65,21,1555,341,86,21,3678',
+  'NUM_5'     : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,65,21,21,21,65,21,21,21,65,21,21,21,21,21,21,21,21,21,65,21,21,21,65,21,21,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'NUM_6'     : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,21,21,65,21,65,21,21,21,65,21,21,21,21,21,21,21,65,21,21,21,21,21,65,21,21,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'NUM_7'     : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,65,21,65,21,65,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,21,21,65,21,21,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'NUM_8'     : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,21,21,21,21,21,21,65,21,65,21,21,21,21,21,21,21,65,21,65,21,65,21,21,21,21,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'NUM_9'     : '38000,1,69,340,171,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,65,21,65,21,21,21,21,21,65,21,65,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,21,21,65,21,65,21,65,21,1555,340,86,21,3678',
+  'HDMI2'     : '38000,1,69,343,172,21,22,21,22,21,65,21,22,21,22,21,22,21,22,21,22,21,65,21,65,21,22,21,65,21,65,21,65,21,65,21,65,21,22,21,22,21,65,21,65,21,22,21,22,21,65,21,65,21,65,21,65,21,22,21,22,21,65,21,65,21,22,21,22,21,1673,343,86,21,3732'
+]
+
+preferences {
+  input name: "molIPAddress", type: "text", title: "MolSmart GW3 IP Address", required: true, defaultValue: "192.168.1.100"
+  input name: "serialNum", title: "Numero de serie (Etiqueta GW3)", type: "string", defaultValue: "111111"
+  input name: "verifyCode", title: "Verify code (Etiqueta GW3)", type: "string", defaultValue: "111111"
+  input name: "channel", title: "Canal Infravermelho (1/2 ou 3)", type: "string", defaultValue: "1"
+  
+  input name: "logEnable", type: "bool", title: "Enable debug logging", defaultValue: false
+}
+
+def configure() {
+  log.debug "configure()"
+}
+
+def installed() {
+  sendEvent(name: "numberOfButtons", value: 24)
+  log.debug "installed()"
+  off()
+  setdefaults()
+}
+
+def updated() {
+  log.debug "updated()"
+  setdefaults()
+  off()
+  AtualizaDadosGW3()
+}
+
+// Get Device info and set as state to use during driver
+def AtualizaDadosGW3() {
+  state.currentip = settings.molIPAddress
+  state.serialNum = settings.serialNum
+  state.verifyCode = settings.verifyCode
+  state.channel = settings.channel
+  
+  log.info "GW3 Dados atualizados - IP: ${state.currentip}, Serial: ${state.serialNum}"
+}
+
+// Default values
+def setdefaults() {
+  sendEvent(name: "tvCommand", value: "OFF", descriptionText: "TV command set to OFF")
+  sendEvent(name: "switch", value: "off")
+  log.debug "Defaults set"
+}
+
+// Comandos principais (Power)
+def on() {
+  log.info "Ligando TV..."
+  sendEvent(name: "switch", value: "on")
+  sendEvent(name: "tvCommand", value: "ON")
+  EnviaComando(IR_CODES['ON'])
+}
+
+
+def off() {
+  log.info "Desligando TV..."
+  sendEvent(name: "switch", value: "off")
+  sendEvent(name: "tvCommand", value: "OFF")
+  EnviaComando(IR_CODES['OFF'])
+}
+
+
+def commandON() {
+  on()
+}
+
+
+def commandOFF() {
+  off()
+}
+
+// Funções auxiliares
+private void sendTvCommand(String label, String key) {
+  log.info "Comando TV: ${label}"
+  sendEvent(name: "tvCommand", value: label)
+  EnviaComando(IR_CODES[key])
+}
+
+// Comandos de canal
+def chUp()      { sendTvCommand("CH_UP",      'CH_UP') }
+def chDown()    { sendTvCommand("CH_DOWN",    'CH_DOWN') }
+
+// Outros comandos principais
+def tvReturn()  { sendTvCommand("RETURN",     'RETURN') }
+def menu()      { sendTvCommand("MENU",       'MENU') }
+def mute()      { sendTvCommand("MUTE",       'MUTE') }
+def home()      { sendTvCommand("HOME",       'HOME') }
+
+// Cursor
+def cursorUp()    { sendTvCommand("CUR_UP",    'CUR_UP') }
+def cursorDown()  { sendTvCommand("CUR_DOWN",  'CUR_DOWN') }
+def cursorLeft()  { sendTvCommand("CUR_LEFT",  'CUR_LEFT') }
+def cursorRight() { sendTvCommand("CUR_RIGHT", 'CUR_RIGHT') }
+def cursorOK()    { sendTvCommand("CUR_OK",    'CUR_OK') }
+
+// Números
+def num0() { sendTvCommand("NUM_0", 'NUM_0') }
+def num1() { sendTvCommand("NUM_1", 'NUM_1') }
+def num2() { sendTvCommand("NUM_2", 'NUM_2') }
+def num3() { sendTvCommand("NUM_3", 'NUM_3') }
+def num4() { sendTvCommand("NUM_4", 'NUM_4') }
+def num5() { sendTvCommand("NUM_5", 'NUM_5') }
+def num6() { sendTvCommand("NUM_6", 'NUM_6') }
+def num7() { sendTvCommand("NUM_7", 'NUM_7') }
+def num8() { sendTvCommand("NUM_8", 'NUM_8') }
+def num9() { sendTvCommand("NUM_9", 'NUM_9') }
+
+// HDMI
+def hdmi2() { sendTvCommand("HDMI2", 'HDMI2') }
+
+// Enviar comando via HTTP POST
+def EnviaComando(command) {
+  if (!command) {
+    log.warn "Nenhum codigo IR configurado"
+    return
+  }
+
+  def URI = "http://" + state.currentip + "/api/device/deviceDetails/smartHomeAutoHttpControl?serialNum=" + state.serialNum + "&verifyCode=" + state.verifyCode + "&c=" + state.channel + "&gc=" + command
+
+  try {
+    httpPost(URI.replaceAll(' ', '%20'), "") { resp ->
+      if (resp.data) {
+        log.info "Resposta: ${resp.data}"
+      }
+    }
+    log.info "Comando enviado: ${URI}"
+  } catch (Exception e) {
+    log.error "Erro ao enviar comando: ${e.message}"
+  }
+}
+
+
+def parse(String description) {
+  logDebug "$description"
+}
+
+
+private logDebug(msg) {
+  if (settings?.logEnable) {
+    log.debug "$msg"
+  }
+}

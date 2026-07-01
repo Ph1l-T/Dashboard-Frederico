@@ -1,7 +1,7 @@
 {
-  "name": "dashboard-novo-cliente-template",
+  "name": "dashboard-frederico",
   "version": "1.0.0",
-  "description": "Dashboard de automação residencial - template limpo para novo cliente",
+  "description": "Dashboard de automação residencial - Frederico",
   "main": "index.html",
   "scripts": {
     "dev": "node server.js",

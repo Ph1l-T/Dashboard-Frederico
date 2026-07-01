@@ -1939,8 +1939,9 @@ function tvCommand(el, command) {
   const deviceId = el.dataset.deviceId;
   if (!command || !deviceId) return;
   const wrapper = el.closest?.(".tv-control-wrapper");
+  const usesDirectMute = wrapper?.dataset?.directMute === "true";
 
-  if (command === "mute") {
+  if (command === "mute" && !usesDirectMute) {
     const slider = document.getElementById("tv-volume-slider");
     if (slider) {
       slider.value = "0";
@@ -8162,6 +8163,128 @@ function updateDenonMetadata() {
     });
 }
 
+function getMusicAlbumAccentTarget() {
+  const activePage = document.querySelector(".page.active");
+  return (
+    activePage?.querySelector?.(".music-reset-now") ||
+    queryActiveMusic(".music-reset-now") ||
+    queryActiveMusic(".music-player-card")
+  );
+}
+
+function applyMusicAlbumAccentFromImage(imageElement) {
+  const target = getMusicAlbumAccentTarget();
+  if (!target || !imageElement) return;
+
+  if (!imageElement.complete || !imageElement.naturalWidth) {
+    imageElement.addEventListener(
+      "load",
+      () => applyMusicAlbumAccentFromImage(imageElement),
+      { once: true },
+    );
+    return;
+  }
+
+  try {
+    const sampleSize = 48;
+    const canvas = document.createElement("canvas");
+    canvas.width = sampleSize;
+    canvas.height = sampleSize;
+
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return;
+
+    context.drawImage(imageElement, 0, 0, sampleSize, sampleSize);
+    const pixels = context.getImageData(0, 0, sampleSize, sampleSize).data;
+    const buckets = new Map();
+    let fallback = { r: 0, g: 0, b: 0, count: 0 };
+
+    for (let index = 0; index < pixels.length; index += 4) {
+      const alpha = pixels[index + 3];
+      if (alpha < 160) continue;
+
+      const r = pixels[index];
+      const g = pixels[index + 1];
+      const b = pixels[index + 2];
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const light = (max + min) / 2;
+
+      if (light < 22 || light > 242) continue;
+
+      const saturation =
+        max === min ? 0 : (max - min) / (255 - Math.abs(max + min - 255));
+      fallback.r += r;
+      fallback.g += g;
+      fallback.b += b;
+      fallback.count += 1;
+
+      const bucketSize = 24;
+      const key = [
+        Math.round(r / bucketSize) * bucketSize,
+        Math.round(g / bucketSize) * bucketSize,
+        Math.round(b / bucketSize) * bucketSize,
+      ].join(",");
+
+      const bucket = buckets.get(key) || {
+        r: 0,
+        g: 0,
+        b: 0,
+        saturation: 0,
+        light: 0,
+        count: 0,
+      };
+      bucket.r += r;
+      bucket.g += g;
+      bucket.b += b;
+      bucket.saturation += saturation;
+      bucket.light += light;
+      bucket.count += 1;
+      buckets.set(key, bucket);
+    }
+
+    let dominant = null;
+    let dominantScore = -Infinity;
+
+    buckets.forEach((bucket) => {
+      const avgLight = bucket.light / bucket.count;
+      const avgSaturation = bucket.saturation / bucket.count;
+      const midLightBias = 1 - Math.min(1, Math.abs(avgLight - 132) / 132);
+      const score =
+        bucket.count *
+        (1 + avgSaturation * 1.7) *
+        (0.75 + midLightBias * 0.45);
+
+      if (score > dominantScore) {
+        dominantScore = score;
+        dominant = bucket;
+      }
+    });
+
+    const source = dominant || fallback;
+    if (!source || !source.count) return;
+
+    const r = Math.round(source.r / source.count);
+    const g = Math.round(source.g / source.count);
+    const b = Math.round(source.b / source.count);
+    target.style.setProperty("--music-album-accent-rgb", `${r}, ${g}, ${b}`);
+  } catch (error) {
+    debugLog(() => ["Nao foi possivel extrair cor da capa", error]);
+  }
+}
+
+function scheduleMusicAlbumAccentUpdate(imageElement) {
+  if (!imageElement) return;
+  const update = () => applyMusicAlbumAccentFromImage(imageElement);
+
+  if (imageElement.complete && imageElement.naturalWidth) {
+    window.requestAnimationFrame(update);
+    return;
+  }
+
+  imageElement.addEventListener("load", update, { once: true });
+}
+
 // Função para atualizar a UI do player com os metadados
 function updateMusicPlayerUI(artist, track, album, albumArt) {
   artist = normalizePortugueseText(artist);
@@ -8208,15 +8331,31 @@ function updateMusicPlayerUI(artist, track, album, albumArt) {
 
   // Atualizar imagem do álbum
   if (albumImgElement) {
-    if (albumArt && albumArt !== "null" && albumArt !== "") {
-      albumImgElement.src = albumArt;
+    const setAlbumImage = (source) => {
+      if (source && /^https?:\/\//i.test(source)) {
+        albumImgElement.crossOrigin = "anonymous";
+      } else {
+        albumImgElement.removeAttribute("crossorigin");
+      }
+
+      albumImgElement.onload = () =>
+        applyMusicAlbumAccentFromImage(albumImgElement);
       albumImgElement.onerror = function () {
-        // Se a imagem falhar, use placeholder, se existir
+        this.onerror = null;
+        this.onload = () => applyMusicAlbumAccentFromImage(this);
+        this.removeAttribute("crossorigin");
         this.src = albumPlaceholder;
       };
+
+      albumImgElement.src = source || albumPlaceholder;
+      scheduleMusicAlbumAccentUpdate(albumImgElement);
+    };
+
+    if (albumArt && albumArt !== "null" && albumArt !== "") {
+      setAlbumImage(albumArt);
     } else {
       // Usar placeholder padrão
-      albumImgElement.src = albumPlaceholder;
+      setAlbumImage(albumPlaceholder);
     }
   }
 
@@ -8425,9 +8564,12 @@ function initMusicPlayerUI() {
       ? window.musicPlayerUI.currentPowerState
       : "on";
 
-  if (!playToggleBtn || !nextBtn || !prevBtn) {
-    console.warn("⚠️ Botões de controle não encontrados");
-    return;
+  const hasTransportControls = Boolean(playToggleBtn && nextBtn && prevBtn);
+  const usesZeroMute = muteBtn?.dataset?.muteMode === "zero";
+  if (!hasTransportControls) {
+    debugLog(() => [
+      "initMusicPlayerUI: controles de midia ausentes; usando layout minimo",
+    ]);
   }
 
   // Estado do volume
@@ -8442,8 +8584,11 @@ function initMusicPlayerUI() {
 
   function setPlaying(isPlayingValue) {
     isPlaying = !!isPlayingValue;
-    playToggleBtn.setAttribute("aria-pressed", isPlaying ? "true" : "false");
-    playToggleBtn.classList.toggle("is-playing", isPlaying);
+    if (playToggleBtn) {
+      playToggleBtn.setAttribute("aria-pressed", isPlaying ? "true" : "false");
+      playToggleBtn.classList.toggle("is-playing", isPlaying);
+      playToggleBtn.setAttribute("aria-label", isPlaying ? "Pausar" : "Tocar");
+    }
 
     if (playTogglePlayIcon) {
       playTogglePlayIcon.style.display = isPlaying ? "none" : "block";
@@ -8453,7 +8598,6 @@ function initMusicPlayerUI() {
       playTogglePauseIcon.style.display = isPlaying ? "block" : "none";
     }
 
-    playToggleBtn.setAttribute("aria-label", isPlaying ? "Pausar" : "Tocar");
     window.musicPlayerUI.currentPlaying = isPlaying;
   }
 
@@ -8479,26 +8623,39 @@ function initMusicPlayerUI() {
 
   function setMuted(muted) {
     isMuted = muted;
-    muteBtn.setAttribute("aria-pressed", muted ? "true" : "false");
-    volumeSection.setAttribute("data-muted", muted ? "true" : "false");
+    if (muteBtn) {
+      muteBtn.setAttribute("aria-pressed", muted ? "true" : "false");
+    }
+    if (volumeSection) {
+      volumeSection.setAttribute("data-muted", muted ? "true" : "false");
+    }
 
     if (muted) {
-      volumeBeforeMute = parseInt(volumeSlider.value);
-      volumeSlider.value = 0;
-      volumeSlider.setAttribute("disabled", "true");
-      volumeSlider.style.pointerEvents = "none";
+      if (volumeSlider) {
+        volumeBeforeMute = parseInt(volumeSlider.value, 10);
+        volumeSlider.value = 0;
+        if (!usesZeroMute) {
+          volumeSlider.setAttribute("disabled", "true");
+          volumeSlider.style.pointerEvents = "none";
+        }
+      }
       console.log("🔇 Volume mutado. Volume anterior:", volumeBeforeMute);
       // Atualiza a barra visual para 0% quando mutado
       if (typeof updateVolumeBar === "function") updateVolumeBar();
       updateVolumeIcons(0, true);
     } else {
-      volumeSlider.value = volumeBeforeMute;
-      volumeSlider.removeAttribute("disabled");
-      volumeSlider.style.pointerEvents = "auto";
+      if (volumeSlider) {
+        volumeSlider.value = volumeBeforeMute;
+        volumeSlider.removeAttribute("disabled");
+        volumeSlider.style.pointerEvents = "auto";
+      }
       console.log("🔊 Volume desmutado. Volume restaurado:", volumeBeforeMute);
       // Atualiza a barra visual para o valor restaurado
       if (typeof updateVolumeBar === "function") updateVolumeBar();
-      updateVolumeIcons(parseInt(volumeSlider.value), false);
+      updateVolumeIcons(
+        parseInt(volumeSlider?.value || volumeBeforeMute, 10),
+        false,
+      );
     }
   }
 
@@ -8510,7 +8667,9 @@ function initMusicPlayerUI() {
 
   // Tentar detectar overrides a partir dos atributos data-*
   try {
-    const metadataContainer = queryActiveMusic(".music-player-card");
+    const metadataContainer =
+      queryActiveMusic(".music-reset-now") ||
+      queryActiveMusic(".music-player-card");
     const ctrlFromEl =
       queryActiveMusic("#music-mute") ||
       queryActiveMusic("#music-volume-slider") ||
@@ -8556,48 +8715,50 @@ function initMusicPlayerUI() {
       el.dataset.deviceId = DENON_CMD_DEVICE_ID;
     });
 
-  playToggleBtn.addEventListener("click", () => {
-    const action = isPlaying ? "pause" : "play";
-    console.log(
-      "🎵 Toggle play/pause -> enviando comando",
-      action,
-      "para device",
-      DENON_MUSIC_DEVICE_ID,
-    );
-
-    sendHubitatCommand(DENON_MUSIC_DEVICE_ID, action)
-      .then(() => {
-        console.log("✅ Comando " + action + " enviado com sucesso");
-        setPlaying(!isPlaying);
-      })
-      .catch((err) =>
-        console.error("⚠️Erro ao enviar comando " + action + ":", err),
+  if (hasTransportControls) {
+    playToggleBtn.addEventListener("click", () => {
+      const action = isPlaying ? "pause" : "play";
+      console.log(
+        "🎵 Toggle play/pause -> enviando comando",
+        action,
+        "para device",
+        DENON_MUSIC_DEVICE_ID,
       );
-  });
 
-  nextBtn.addEventListener("click", () => {
-    console.log(
-      "⏭️ Next clicked - enviando comando para device",
-      DENON_MUSIC_DEVICE_ID,
-    );
-    sendHubitatCommand(DENON_MUSIC_DEVICE_ID, "nextTrack")
-      .then(() => console.log("✅ Comando nextTrack enviado com sucesso"))
-      .catch((err) =>
-        console.error("⚠️Erro ao enviar comando nextTrack:", err),
-      );
-  });
+      sendHubitatCommand(DENON_MUSIC_DEVICE_ID, action)
+        .then(() => {
+          console.log("✅ Comando " + action + " enviado com sucesso");
+          setPlaying(!isPlaying);
+        })
+        .catch((err) =>
+          console.error("⚠️Erro ao enviar comando " + action + ":", err),
+        );
+    });
 
-  prevBtn.addEventListener("click", () => {
-    console.log(
-      "⏮️ Previous clicked - enviando comando para device",
-      DENON_MUSIC_DEVICE_ID,
-    );
-    sendHubitatCommand(DENON_MUSIC_DEVICE_ID, "previousTrack")
-      .then(() => console.log("✅ Comando previousTrack enviado com sucesso"))
-      .catch((err) =>
-        console.error("⚠️Erro ao enviar comando previousTrack:", err),
+    nextBtn.addEventListener("click", () => {
+      console.log(
+        "⏭️ Next clicked - enviando comando para device",
+        DENON_MUSIC_DEVICE_ID,
       );
-  });
+      sendHubitatCommand(DENON_MUSIC_DEVICE_ID, "nextTrack")
+        .then(() => console.log("✅ Comando nextTrack enviado com sucesso"))
+        .catch((err) =>
+          console.error("⚠️Erro ao enviar comando nextTrack:", err),
+        );
+    });
+
+    prevBtn.addEventListener("click", () => {
+      console.log(
+        "⏮️ Previous clicked - enviando comando para device",
+        DENON_MUSIC_DEVICE_ID,
+      );
+      sendHubitatCommand(DENON_MUSIC_DEVICE_ID, "previousTrack")
+        .then(() => console.log("✅ Comando previousTrack enviado com sucesso"))
+        .catch((err) =>
+          console.error("⚠️Erro ao enviar comando previousTrack:", err),
+        );
+    });
+  }
 
   window.musicPlayerUI.setPlaying = setPlaying;
   window.musicPlayerUI.isPlaying = () => isPlaying;
@@ -8607,6 +8768,18 @@ function initMusicPlayerUI() {
     bindVerticalVolumeSlider(volumeSlider);
 
     muteBtn.addEventListener("click", () => {
+      if (usesZeroMute) {
+        volumeBeforeMute = parseInt(volumeSlider.value, 10) || volumeBeforeMute;
+        setMuted(true);
+        recentCommands.set(DENON_CMD_DEVICE_ID, Date.now());
+        sendHubitatCommand(DENON_CMD_DEVICE_ID, "setVolume", "0")
+          .then(() => console.log("✅ Volume zerado com sucesso"))
+          .catch((err) =>
+            console.error("⚠️Erro ao zerar volume da música:", err),
+          );
+        return;
+      }
+
       const newMutedState = !isMuted;
       const command = newMutedState ? "mute" : "unmute";
       console.log(
@@ -8636,6 +8809,12 @@ function initMusicPlayerUI() {
 
     // Event listener para input (arrastar o slider)
     volumeSlider.addEventListener("input", (e) => {
+      const value = parseInt(e.target.value, 10);
+      if (usesZeroMute && value > 0 && isMuted) {
+        isMuted = false;
+        muteBtn.setAttribute("aria-pressed", "false");
+        volumeSection.setAttribute("data-muted", "false");
+      }
       updateVolumeBar();
     });
 
@@ -8688,7 +8867,9 @@ function initMusicPlayerUI() {
 
     console.log("🎵 Slider de volume configurado:", volumeSlider);
   } else {
-    console.warn("⚠️ Botão mute ou slider não encontrados");
+    debugLog(() => [
+      "initMusicPlayerUI: controles de volume ausentes no layout atual",
+    ]);
   }
 
   // Controle master On/Off
@@ -8755,8 +8936,11 @@ function initMusicPlayerUI() {
   window.musicPlayerUI.isPowerOn = () => isPowerOn;
 
   // initialize
-  setPlaying(Boolean(window.musicPlayerUI.currentPlaying));
+  if (hasTransportControls) {
+    setPlaying(Boolean(window.musicPlayerUI.currentPlaying));
+  }
   setMasterPower(initialPowerState === "on");
+  scheduleMusicAlbumAccentUpdate(queryActiveMusic(".music-album-img"));
 
   // Buscar metadados iniciais do Denon
   updateDenonMetadata();
