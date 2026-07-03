@@ -1,10 +1,34 @@
-/* Raleway Font - Local */
+/* Rawline Font - Raleway with lining numerals, exposed as Raleway */
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url('fonts/rawline/rawline-100.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url('fonts/rawline/rawline-200.woff2') format('woff2');
+}
+
 @font-face {
   font-family: 'Raleway';
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url('fonts/raleway/Raleway-latin-300.woff2') format('woff2');
+  src: url('fonts/rawline/rawline-300.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/rawline/rawline-400.woff2') format('woff2');
 }
 
 @font-face {
@@ -12,7 +36,15 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('fonts/raleway/Raleway-latin-500.woff2') format('woff2');
+  src: url('fonts/rawline/rawline-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/rawline/rawline-600.woff2') format('woff2');
 }
 
 @font-face {
@@ -20,5 +52,21 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('fonts/raleway/Raleway-latin-700.woff2') format('woff2');
+  src: url('fonts/rawline/rawline-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('fonts/rawline/rawline-800.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('fonts/rawline/rawline-900.woff2') format('woff2');
 }

@@ -6,7 +6,6 @@ yarn-error.log*
 
 # Local documentation
 *.md
-!TODO-FREDERICO.md
 
 # Environment variables
 .env*

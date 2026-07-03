@@ -288,7 +288,7 @@ const CLIENT_CONFIG = {
   environments: {
     ambiente1: {
       visible: true,
-      order: 1,
+      order: 3,
       name: "Home",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -323,7 +323,7 @@ const CLIENT_CONFIG = {
     },
     ambiente2: {
       visible: true,
-      order: 2,
+      order: 1,
       name: "Living/Jantar",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -370,7 +370,7 @@ const CLIENT_CONFIG = {
     },
     ambiente3: {
       visible: true,
-      order: 4,
+      order: 2,
       name: "Varanda",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -413,7 +413,7 @@ const CLIENT_CONFIG = {
     },
     ambiente4: {
       visible: true,
-      order: 5,
+      order: 6,
       name: "Suíte I",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -443,7 +443,7 @@ const CLIENT_CONFIG = {
     },
     ambiente5: {
       visible: true,
-      order: 6,
+      order: 7,
       name: "Suíte II",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -473,7 +473,7 @@ const CLIENT_CONFIG = {
     },
     ambiente7: {
       visible: true,
-      order: 7,
+      order: 8,
       name: "Suíte Master",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -506,7 +506,7 @@ const CLIENT_CONFIG = {
     },
     ambiente8: {
       visible: true,
-      order: 8,
+      order: 5,
       name: "Escritório",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -536,7 +536,7 @@ const CLIENT_CONFIG = {
     },
     ambiente9: {
       visible: true,
-      order: 3,
+      order: 4,
       name: "Cozinha",
       photo: "photo-placeholder.webp",
       quickActions: [],

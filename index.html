@@ -8,13 +8,37 @@
     />
     <title>Dashboard Frederico</title>
     <style>
-      /* Raleway Font - embutido */
+      /* Rawline Font - Raleway with lining numerals, exposed as Raleway */
+      @font-face {
+        font-family: "Raleway";
+        font-style: normal;
+        font-weight: 100;
+        font-display: swap;
+        src: url("fonts/rawline/rawline-100.woff2") format("woff2");
+      }
+
+      @font-face {
+        font-family: "Raleway";
+        font-style: normal;
+        font-weight: 200;
+        font-display: swap;
+        src: url("fonts/rawline/rawline-200.woff2") format("woff2");
+      }
+
       @font-face {
         font-family: "Raleway";
         font-style: normal;
         font-weight: 300;
         font-display: swap;
-        src: url("fonts/raleway/Raleway-latin-300.woff2") format("woff2");
+        src: url("fonts/rawline/rawline-300.woff2") format("woff2");
+      }
+
+      @font-face {
+        font-family: "Raleway";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url("fonts/rawline/rawline-400.woff2") format("woff2");
       }
 
       @font-face {
@@ -22,7 +46,15 @@
         font-style: normal;
         font-weight: 500;
         font-display: swap;
-        src: url("fonts/raleway/Raleway-latin-500.woff2") format("woff2");
+        src: url("fonts/rawline/rawline-500.woff2") format("woff2");
+      }
+
+      @font-face {
+        font-family: "Raleway";
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url("fonts/rawline/rawline-600.woff2") format("woff2");
       }
 
       @font-face {
@@ -30,14 +62,30 @@
         font-style: normal;
         font-weight: 700;
         font-display: swap;
-        src: url("fonts/raleway/Raleway-latin-700.woff2") format("woff2");
+        src: url("fonts/rawline/rawline-700.woff2") format("woff2");
+      }
+
+      @font-face {
+        font-family: "Raleway";
+        font-style: normal;
+        font-weight: 800;
+        font-display: swap;
+        src: url("fonts/rawline/rawline-800.woff2") format("woff2");
+      }
+
+      @font-face {
+        font-family: "Raleway";
+        font-style: normal;
+        font-weight: 900;
+        font-display: swap;
+        src: url("fonts/rawline/rawline-900.woff2") format("woff2");
       }
     </style>
-    <link rel="preload" href="styles.css?v=1.0.47" as="style" />
-    <link rel="stylesheet" href="styles.css?v=1.0.47" />
+    <link rel="preload" href="styles.css?v=1.0.62" as="style" />
+    <link rel="stylesheet" href="styles.css?v=1.0.62" />
     <link rel="stylesheet" href="main-home.css?v=1.0.0" />
     <link rel="stylesheet" href="routines.css?v=1.0.19" />
-    <script src="config.js?v=frederico-1.0.6"></script>
+    <script src="config.js?v=frederico-1.0.7"></script>
     <link rel="icon" href="images/pwa/app-icon-192.png" type="image/png" />
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#1C1C1C" />
@@ -450,7 +498,7 @@
     <script src="auth.js?v=1.0.0" defer></script>
     <script src="access-control.js?v=1.0.1" defer></script>
     <script src="main-home.js?v=1.0.0" defer></script>
-    <script src="script.js?v=1.0.28" defer></script>
+    <script src="script.js?v=1.0.30" defer></script>
     <script>
       // Função temporária updateProgress até script.js carregar
       window.updateProgress =
@@ -2262,20 +2310,49 @@
         const channelControlsMarkup =
           isTvControl && tvBrandCapabilities.channelButtons
             ? `
-                <header class="tv-section-header">
+                <header class="tv-section-header tv-top-panel-header">
                   <h3 class="tv-section-title">Canais</h3>
                   <div class="tv-section-line"></div>
                 </header>
-                <div class="tv-control-group tv-media-grid">
-                  <button class="tv-btn-square" onclick="tvCommand(this, '${tvCommandFor("channelDown", "channelDown")}')" data-device-id="${deviceId}" aria-label="Canal anterior">
+                <div class="tv-control-group tv-channel-grid">
+                  <button class="tv-btn-square tv-channel-btn" onclick="tvCommand(this, '${tvCommandFor("channelDown", "channelDown")}')" data-device-id="${deviceId}" aria-label="Canal anterior">
                     <img src="images/icons/arrow-down.svg" alt="Canal anterior" class="tv-btn-icon-img">
                   </button>
-                  <button class="tv-btn-square" onclick="tvCommand(this, '${tvCommandFor("channelUp", "channelUp")}')" data-device-id="${deviceId}" aria-label="Pr&oacute;ximo canal">
+                  <button class="tv-btn-square tv-channel-btn" onclick="tvCommand(this, '${tvCommandFor("channelUp", "channelUp")}')" data-device-id="${deviceId}" aria-label="Pr&oacute;ximo canal">
                     <img src="images/icons/arrow-up.svg" alt="Pr&oacute;ximo canal" class="tv-btn-icon-img">
                   </button>
                 </div>
               `
             : "";
+        const volumeSliderControlMarkup = `
+                <header class="tv-section-header tv-top-panel-header">
+                  <h3 class="tv-section-title">Volume</h3>
+                  <span class="tv-volume-value tv-top-panel-value" id="tv-volume-display">50</span>
+                  <div class="tv-section-line"></div>
+                </header>
+                <div class="tv-control-group tv-volume-slider-container">
+                  <div class="tv-volume-desktop-layout">
+                    <div class="tv-volume-step-controls" aria-label="Ajuste fino de volume">
+                      <button class="tv-volume-step-btn tv-volume-step-btn--up" type="button" onclick="adjustTvVolume(this, 3)" aria-label="Aumentar volume em 3">
+                        <img src="images/icons/arrow-up.svg" alt="">
+                      </button>
+                      <button class="tv-volume-step-btn tv-volume-step-btn--down" type="button" onclick="adjustTvVolume(this, -3)" aria-label="Diminuir volume em 3">
+                        <img src="images/icons/arrow-down.svg" alt="">
+                      </button>
+                    </div>
+                    <input
+                      type="range"
+                      class="tv-volume-slider"
+                      id="tv-volume-slider"
+                      min="0"
+                      max="100"
+                      value="50"
+                      data-device-id="${volumeId}"
+                      aria-label="Controle de Volume"
+                    >
+                  </div>
+                </div>
+            `;
         const numpadFooterMarkup = isClaroTv
           ? `
                         <button class="tv-numpad-btn tv-numpad-btn--icon" onclick="tvCommand(this, 'returnButton')" data-device-id="${deviceId}" aria-label="Voltar">
@@ -2296,27 +2373,22 @@
                         </button>
                 `;
         const volumeControlMarkup =
-          isTvControl && tvBrandCapabilities.volumeSlider === false
-            ? channelControlsMarkup
-            : `
-                <header class="tv-section-header">
-                  <h3 class="tv-section-title">Volume</h3>
-                  <span class="tv-volume-value" id="tv-volume-display">50</span>
-                  <div class="tv-section-line"></div>
-                </header>
-                <div class="tv-control-group tv-volume-slider-container">
-                  <input 
-                    type="range" 
-                    class="tv-volume-slider" 
-                    id="tv-volume-slider"
-                    min="0" 
-                    max="100" 
-                    value="50"
-                    data-device-id="${volumeId}"
-                    aria-label="Controle de Volume"
-                  >
+          isTvControl && tvBrandCapabilities.channelButtons
+            ? `
+                <div class="tv-top-panel" data-tv-top-panel="channels">
+                  <div class="tv-top-panel-tabs" role="tablist" aria-label="Canais e volume">
+                    <button class="tv-top-panel-tab is-active" type="button" data-target="channels" onclick="setTvTopPanel(this, 'channels')" aria-pressed="true">Canais</button>
+                    <button class="tv-top-panel-tab" type="button" data-target="volume" onclick="setTvTopPanel(this, 'volume')" aria-pressed="false">Volume</button>
+                  </div>
+                  <div class="tv-top-panel-section is-active" data-tv-top-section="channels">
+                    ${channelControlsMarkup}
+                  </div>
+                  <div class="tv-top-panel-section" data-tv-top-section="volume">
+                    ${volumeSliderControlMarkup}
+                  </div>
                 </div>
-            `;
+            `
+            : volumeSliderControlMarkup;
         const commandsControlMarkup = `
                 <header class="tv-section-header">
                   <h3 class="tv-section-title">Comandos</h3>

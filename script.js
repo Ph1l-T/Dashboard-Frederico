@@ -1872,6 +1872,7 @@ function updateTVPowerState(newState, options = {}) {
   const volumeSection = wrapper.querySelectorAll(
     ".tv-col-2 > .tv-control-section",
   );
+  const keepTvControlsAvailable = wrapper.dataset?.controlType === "tv";
 
   if (normalizedState === "on") {
     // TV ligada
@@ -1903,34 +1904,55 @@ function updateTVPowerState(newState, options = {}) {
 
     console.log("📺 TV LIGADA - Controles visíveis");
   } else {
-    // TV desligada - opacidade 30% (0.3)
+    // TV desligada
     btnOff?.classList.add("active");
     btnOn?.classList.remove("active");
 
-    // Escurecer e desabilitar outros controles
-    otherControls.forEach((control) => {
-      control.style.opacity = "0.3";
-      control.style.pointerEvents = "none";
-    });
-    gestureIcons.forEach((control) => {
-      control.style.opacity = "0.3";
-      control.style.pointerEvents = "none";
-    });
-    gestureSurface.forEach((control) => {
-      control.style.opacity = "0.3";
-      control.style.pointerEvents = "none";
-    });
-    volumeSection.forEach((control) => {
-      control.style.opacity = "0.3";
-      control.style.pointerEvents = "none";
-    });
+    if (keepTvControlsAvailable) {
+      otherControls.forEach((control) => {
+        control.style.opacity = "1";
+        control.style.pointerEvents = "auto";
+      });
+      gestureIcons.forEach((control) => {
+        control.style.opacity = "";
+        control.style.pointerEvents = "none";
+      });
+      gestureSurface.forEach((control) => {
+        control.style.opacity = "";
+        control.style.pointerEvents = "";
+      });
+      volumeSection.forEach((control) => {
+        control.style.opacity = "1";
+        control.style.pointerEvents = "auto";
+      });
+      titles.forEach((title) => {
+        title.style.opacity = "1";
+      });
 
-    // Apagar títulos
-    titles.forEach((title) => {
-      title.style.opacity = "0.3";
-    });
+      console.log("📺 TV DESLIGADA - Controles disponíveis");
+    } else {
+      otherControls.forEach((control) => {
+        control.style.opacity = "0.3";
+        control.style.pointerEvents = "none";
+      });
+      gestureIcons.forEach((control) => {
+        control.style.opacity = "0.3";
+        control.style.pointerEvents = "none";
+      });
+      gestureSurface.forEach((control) => {
+        control.style.opacity = "0.3";
+        control.style.pointerEvents = "none";
+      });
+      volumeSection.forEach((control) => {
+        control.style.opacity = "0.3";
+        control.style.pointerEvents = "none";
+      });
+      titles.forEach((title) => {
+        title.style.opacity = "0.3";
+      });
 
-    console.log("📺 TV DESLIGADA - Controles desabilitados");
+      console.log("📺 TV DESLIGADA - Controles desabilitados");
+    }
   }
 }
 
@@ -2152,6 +2174,49 @@ function setTvPortraitPanel(trigger, panel) {
   if (favoriteBtn) {
     favoriteBtn.classList.toggle("is-active", nextPanel === "favorites");
   }
+}
+
+function setTvTopPanel(trigger, panel) {
+  const topPanel = trigger?.closest?.(".tv-top-panel");
+  if (!topPanel) return;
+
+  const nextPanel = String(panel || "channels");
+  topPanel.dataset.tvTopPanel = nextPanel;
+
+  topPanel.querySelectorAll(".tv-top-panel-tab").forEach((tab) => {
+    const isActive = tab.dataset.target === nextPanel;
+    tab.classList.toggle("is-active", isActive);
+    tab.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+
+  topPanel.querySelectorAll("[data-tv-top-section]").forEach((section) => {
+    section.classList.toggle(
+      "is-active",
+      section.dataset.tvTopSection === nextPanel,
+    );
+  });
+}
+
+function adjustTvVolume(trigger, delta) {
+  const wrapper = trigger?.closest?.(".tv-control-wrapper");
+  const slider =
+    trigger?.closest?.("[data-tv-top-section='volume']")?.querySelector?.(
+      "#tv-volume-slider",
+    ) ||
+    wrapper?.querySelector?.("#tv-volume-slider") ||
+    document.getElementById("tv-volume-slider");
+
+  if (!slider) return;
+
+  const step = Number(delta) || 0;
+  const min = Number(slider.min || 0);
+  const max = Number(slider.max || 100);
+  const current = Number(slider.value || 0);
+  const next = Math.min(max, Math.max(min, current + step));
+
+  slider.value = String(next);
+  slider.dispatchEvent(new Event("input", { bubbles: true }));
+  slider.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 function setClaroTvPortraitPanel(trigger, panel) {
@@ -2802,10 +2867,17 @@ function initVolumeSlider() {
     return;
   }
 
-  console.log("🎚️ Inicializando slider de volume do Denon AVR");
+  const fallbackDeviceId = String(slider.dataset.deviceId || "").trim();
+  const volumeDeviceId = String(DENON_DEVICE_ID || fallbackDeviceId).trim();
+  if (!volumeDeviceId) {
+    console.log("⚠️ Slider de volume sem deviceId configurado");
+    return;
+  }
+
+  console.log("🎚️ Inicializando slider de volume");
 
   // Definir o device ID no slider
-  slider.dataset.deviceId = DENON_DEVICE_ID;
+  slider.dataset.deviceId = volumeDeviceId;
 
   // Remover event listeners antigos para evitar duplicação
   const newSlider = slider.cloneNode(true);
@@ -2815,7 +2887,9 @@ function initVolumeSlider() {
   const updatedSlider = document.getElementById("tv-volume-slider");
 
   // Buscar volume atual do Denon e atualizar o slider
-  updateDenonVolumeFromServer();
+  if (DENON_DEVICE_ID) {
+    updateDenonVolumeFromServer();
+  }
 
   // Atualizar display quando slider mudar
   updatedSlider.addEventListener("input", (e) => {
@@ -2835,20 +2909,19 @@ function initVolumeSlider() {
   updatedSlider.addEventListener("change", (e) => {
     const value = e.target.value;
 
-    console.log(`🔊 Volume alterado para: ${value} - enviando para Denon AVR`);
+    console.log(`🔊 Volume alterado para: ${value}`);
 
-    // Enviar comando setVolume para o Denon AVR
-    recentCommands.set(String(DENON_DEVICE_ID), Date.now());
-    sendHubitatCommand(DENON_DEVICE_ID, "setVolume", value)
+    recentCommands.set(String(volumeDeviceId), Date.now());
+    sendHubitatCommand(volumeDeviceId, "setVolume", value)
       .then(() => {
-        console.log(`✅ Volume do Denon definido para ${value}`);
+        console.log(`✅ Volume definido para ${value}`);
       })
       .catch((error) => {
-        console.error(`⚠️Erro ao definir volume do Denon:`, error);
+        console.error(`⚠️Erro ao definir volume:`, error);
       });
   });
 
-  console.log("✅ Slider de volume do Denon AVR inicializado com sucesso");
+  console.log("✅ Slider de volume inicializado com sucesso");
 }
 
 // Função para atualizar o volume do Denon a partir do servidor
@@ -2878,6 +2951,11 @@ async function updateDenonVolumeFromServer() {
       : document.querySelector(".volume-icon-muted");
 
   try {
+    if (!DENON_DEVICE_ID) {
+      debugLog(() => ["updateDenonVolumeFromServer skipped (sem Denon)"]);
+      return;
+    }
+
     if (isHubitatBypassMode()) {
       debugLog(() => ["updateDenonVolumeFromServer skipped (Hubitat bypass)"]);
       return;

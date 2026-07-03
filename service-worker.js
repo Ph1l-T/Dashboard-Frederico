@@ -1,15 +1,24 @@
-const CACHE_VERSION = "frederico-v1.0.6";
+const CACHE_VERSION = "frederico-v1.0.22";
 const CACHE_NAME = `eletrize-${CACHE_VERSION}`;
 const PRECACHE_ASSETS = [
   "/",
   "/index.html",
-  "/styles.css?v=1.0.47",
+  "/styles.css?v=1.0.62",
   "/routines.css?v=1.0.19",
-  "/script.js?v=1.0.28",
+  "/script.js?v=1.0.30",
   "/auth.js?v=1.0.0",
   "/access-control.js?v=1.0.1",
-  "/config.js?v=frederico-1.0.6",
+  "/config.js?v=frederico-1.0.7",
   "/fonts-raleway.css",
+  "/fonts/rawline/rawline-100.woff2",
+  "/fonts/rawline/rawline-200.woff2",
+  "/fonts/rawline/rawline-300.woff2",
+  "/fonts/rawline/rawline-400.woff2",
+  "/fonts/rawline/rawline-500.woff2",
+  "/fonts/rawline/rawline-600.woff2",
+  "/fonts/rawline/rawline-700.woff2",
+  "/fonts/rawline/rawline-800.woff2",
+  "/fonts/rawline/rawline-900.woff2",
   "/manifest.json",
   "/images/pwa/app-icon-192.png",
   "/images/pwa/app-icon-512-transparent.png",
