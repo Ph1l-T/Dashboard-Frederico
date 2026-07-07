@@ -9,7 +9,7 @@ const CLIENT_CONFIG = {
   // Modo de teste local: mantém estados no dashboard sem depender do Hubitat.
   // Use false para voltar ao comportamento normal.
   development: {
-    stateOnlyMode: true,
+    stateOnlyMode: false,
     mqtt: {
       enabled: false,
       brokerUrl: "",
@@ -25,13 +25,13 @@ const CLIENT_CONFIG = {
 
   // Segredos e regras de allowlist ficam no backend (Cloudflare Functions),
   auth: {
-    enabled: false,
-    supabaseUrl: "",
-    supabaseAnonKey: "",
+    enabled: true,
+    supabaseUrl: "https://yclcrsrizurzxvnvwknq.supabase.co",
+    supabaseAnonKey: "sb_publishable_3BE8SgwvhMSd3fVFKvTqWw_CCTmbScE",
     allowEmailSignUp: false,
     allowGoogleLogin: false,
     requireEmailConfirmation: true,
-    redirectTo: "",
+    redirectTo: "https://dashboard-frederico.pages.dev/",
   },
 
   clientInfo: {
