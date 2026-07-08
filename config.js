@@ -288,7 +288,7 @@ const CLIENT_CONFIG = {
   environments: {
     ambiente1: {
       visible: true,
-      order: 3,
+      order: 4,
       name: "Home",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -324,7 +324,7 @@ const CLIENT_CONFIG = {
     ambiente2: {
       visible: true,
       order: 1,
-      name: "Living/Jantar",
+      name: "Living",
       photo: "photo-placeholder.webp",
       quickActions: [],
       lights: [
@@ -335,14 +335,6 @@ const CLIENT_CONFIG = {
         { id: "13", name: "Spots Centrais" },
         { id: "14", name: "Spots Pilar" },
         { id: "15", name: "Spots Móvel" },
-        { id: "16", name: "Spots Mesa" },
-        { id: "17", name: "Spots Jantar" },
-        {
-          id: "47",
-          name: "Lustre Dimmer",
-          type: "dimmer",
-          defaultLevel: 80,
-        },
         {
           id: "46",
           name: "Spots Centro Dimmer",
@@ -357,7 +349,51 @@ const CLIENT_CONFIG = {
         },
       ],
       curtains: [],
-      airConditioner: null,
+      airConditioner: {
+        brand: "lg",
+        zones: [
+          { deviceId: "94", name: "Hall" },
+          { deviceId: "95", name: "Televisão" },
+        ],
+        temperature: { min: 18, max: 25, default: 22 },
+        controls: { aletas: true, windfree: false, zoneSelector: true },
+      },
+      tv: [],
+      htv: [],
+      bluray: [],
+      appletv: [],
+      clarotv: [],
+      roku: [],
+      games: [],
+      hidromassagem: [],
+      music: [],
+    },
+    ambiente10: {
+      visible: true,
+      order: 2,
+      name: "Jantar",
+      photo: "photo-placeholder.webp",
+      quickActions: [],
+      lights: [
+        { id: "17", name: "Spots Jantar" },
+        { id: "16", name: "Spots Mesa" },
+        {
+          id: "47",
+          name: "Lustre Dimmer NC",
+          type: "dimmer",
+          defaultLevel: 80,
+        },
+      ],
+      curtains: [],
+      airConditioner: {
+        brand: "lg",
+        zones: [
+          { deviceId: "90", name: "Churrasqueira" },
+          { deviceId: "91", name: "Hall" },
+        ],
+        temperature: { min: 18, max: 25, default: 22 },
+        controls: { aletas: true, windfree: false, zoneSelector: true },
+      },
       tv: [],
       htv: [],
       bluray: [],
@@ -370,7 +406,7 @@ const CLIENT_CONFIG = {
     },
     ambiente3: {
       visible: true,
-      order: 2,
+      order: 3,
       name: "Varanda",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -400,7 +436,15 @@ const CLIENT_CONFIG = {
         },
       ],
       curtains: [],
-      airConditioner: null,
+      airConditioner: {
+        brand: "lg",
+        zones: [
+          { deviceId: "92", name: "Churrasqueira" },
+          { deviceId: "93", name: "Brinquedoteca" },
+        ],
+        temperature: { min: 18, max: 25, default: 22 },
+        controls: { aletas: true, windfree: false, zoneSelector: true },
+      },
       tv: [],
       htv: [],
       bluray: [],
@@ -413,7 +457,7 @@ const CLIENT_CONFIG = {
     },
     ambiente4: {
       visible: true,
-      order: 6,
+      order: 7,
       name: "Suíte I",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -443,7 +487,7 @@ const CLIENT_CONFIG = {
     },
     ambiente5: {
       visible: true,
-      order: 7,
+      order: 8,
       name: "Suíte II",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -473,7 +517,7 @@ const CLIENT_CONFIG = {
     },
     ambiente7: {
       visible: true,
-      order: 8,
+      order: 9,
       name: "Suíte Master",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -506,7 +550,7 @@ const CLIENT_CONFIG = {
     },
     ambiente8: {
       visible: true,
-      order: 5,
+      order: 6,
       name: "Escritório",
       photo: "photo-placeholder.webp",
       quickActions: [],
@@ -536,7 +580,7 @@ const CLIENT_CONFIG = {
     },
     ambiente9: {
       visible: true,
-      order: 4,
+      order: 5,
       name: "Cozinha",
       photo: "photo-placeholder.webp",
       quickActions: [],

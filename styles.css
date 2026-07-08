@@ -11743,6 +11743,47 @@ body.auth-locked .auth-gate {
   }
 }
 
+/* AC off state: keep every control visible and actionable. */
+[data-component="ac-control"][data-power-off] .ac-temp-number,
+[data-component="ac-control"][data-power-off] .ac-temp-unit,
+[data-component="ac-control"][data-power-off] .ac-temp-knob,
+[data-component="ac-control"][data-power-off] .ac-mode-btn,
+[data-component="ac-control"][data-power-off] .ac-aleta-btn,
+[data-component="ac-control"][data-power-off] .ac-temperature-section,
+[data-component="ac-control"][data-power-off] .ac-controls-wrapper > *,
+[data-component="ac-control"][data-power-off] .ac-commands-section,
+[data-component="ac-control"][data-power-off] .ac-commands-section .ac-section-title,
+[data-component="ac-control"][data-power-off] .ac-commands-section .ac-commands-grid > *,
+[data-component="ac-control"][data-power-off] .ac-commands-section .ac-command-btn,
+[data-component="ac-control"][data-power-off] .acv2-temp,
+[data-component="ac-control"][data-power-off] .acv2-temp > *,
+[data-component="ac-control"][data-power-off] .acv2-temp-display-wrap,
+[data-component="ac-control"][data-power-off] .acv2-temp-display,
+[data-component="ac-control"][data-power-off] .acv2-temp-controls,
+[data-component="ac-control"][data-power-off] .acv2-commands,
+[data-component="ac-control"][data-power-off] .acv2-commands > *,
+[data-component="ac-control"][data-power-off] .acv2-commands .acv2-row,
+[data-component="ac-control"][data-power-off] .acv2-commands .acv2-empty,
+[data-component="ac-control"][data-power-off] .acv2-btn {
+  max-height: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: auto !important;
+}
+
+[data-component="ac-control"][data-power-off] .acv2-temp,
+[data-component="ac-control"][data-power-off] .acv2-commands {
+  gap: 14px;
+}
+
+[data-component="ac-control"][data-power-off] .acv2-temp-controls {
+  margin-top: 10px;
+}
+
+[data-component="ac-control"][data-power-off] .acv2-commands .acv2-row--power {
+  margin-top: auto;
+}
+
 /* ========================================
    GLOBAL TOP SPACING NORMALIZATION
 ======================================== */

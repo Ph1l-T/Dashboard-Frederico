@@ -3999,15 +3999,11 @@ function initAirConditionerControl() {
     }
   }
 
-  function setControlsEnabled(enabled) {
-    tempSlider.toggleAttribute("disabled", !enabled);
-    tempDecreaseButtons.forEach((btn) =>
-      btn.toggleAttribute("disabled", !enabled),
-    );
-    tempIncreaseButtons.forEach((btn) =>
-      btn.toggleAttribute("disabled", !enabled),
-    );
-    aletaButtons.forEach((btn) => btn.toggleAttribute("disabled", !enabled));
+  function keepControlsEnabled() {
+    tempSlider.removeAttribute("disabled");
+    tempDecreaseButtons.forEach((btn) => btn.removeAttribute("disabled"));
+    tempIncreaseButtons.forEach((btn) => btn.removeAttribute("disabled"));
+    aletaButtons.forEach((btn) => btn.removeAttribute("disabled"));
   }
 
   let temperatureDebounceTimer = null;
@@ -4025,7 +4021,7 @@ function initAirConditionerControl() {
     state.temperature = temp;
     updateTemperatureDisplay(temp);
 
-    if (!state.powerOn || options.silent) {
+    if (options.silent) {
       return;
     }
 
@@ -4044,7 +4040,7 @@ function initAirConditionerControl() {
     root.toggleAttribute("data-power-off", !isOn);
     powerOnBtn.setAttribute("aria-pressed", isOn.toString());
     powerOffBtn.setAttribute("aria-pressed", (!isOn).toString());
-    setControlsEnabled(isOn);
+    keepControlsEnabled();
 
     if (temperatureDebounceTimer) {
       clearTimeout(temperatureDebounceTimer);
@@ -4073,7 +4069,6 @@ function initAirConditionerControl() {
   }
 
   function setAletaState(aleta) {
-    if (!state.powerOn) return;
     if (aleta === "windfree") {
       const command = acCommands.windfree;
       if (!command) return;
