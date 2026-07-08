@@ -4037,7 +4037,6 @@ function initAirConditionerControl() {
 
   function setPowerState(isOn, options = {}) {
     state.powerOn = isOn;
-    root.toggleAttribute("data-power-off", !isOn);
     powerOnBtn.setAttribute("aria-pressed", isOn.toString());
     powerOffBtn.setAttribute("aria-pressed", (!isOn).toString());
     keepControlsEnabled();
