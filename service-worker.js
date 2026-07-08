@@ -1,4 +1,4 @@
-const CACHE_VERSION = "frederico-v1.0.29";
+const CACHE_VERSION = "frederico-v1.0.30";
 const CACHE_NAME = `eletrize-${CACHE_VERSION}`;
 const PRECACHE_ASSETS = [
   "/",
@@ -8,7 +8,7 @@ const PRECACHE_ASSETS = [
   "/script.js?v=1.0.32",
   "/auth.js?v=1.0.0",
   "/access-control.js?v=1.0.1",
-  "/config.js?v=frederico-1.0.12",
+  "/config.js?v=frederico-1.0.13",
   "/fonts-raleway.css",
   "/fonts/rawline/rawline-100.woff2",
   "/fonts/rawline/rawline-200.woff2",

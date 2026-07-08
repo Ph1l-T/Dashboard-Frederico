@@ -532,7 +532,7 @@ const CLIENT_CONFIG = {
       },
       tv: [
         {
-          id: "PENDING-FRED-A07-TV01",
+          id: "56",
           name: "Televisão Suíte Master",
           brand: "lg",
         },
