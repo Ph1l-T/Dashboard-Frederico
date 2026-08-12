@@ -817,7 +817,7 @@ const bottomNavConfig = {
       label: "Cortinas",
       path: "curtains",
       icon: "images/icons/icon-curtain.svg",
-      visible: true,
+      visible: false,
       disabled: false,
       external: false,
       order: 3,
