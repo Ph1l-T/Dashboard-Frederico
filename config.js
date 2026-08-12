@@ -290,7 +290,7 @@ const CLIENT_CONFIG = {
       visible: true,
       order: 4,
       name: "Home",
-      photo: "photo-placeholder.webp",
+      photo: "default_background.webp",
       quickActions: [],
       lights: [
         { id: "6", name: "Spots" },
@@ -325,7 +325,7 @@ const CLIENT_CONFIG = {
       visible: true,
       order: 1,
       name: "Living",
-      photo: "photo-placeholder.webp",
+      photo: "default_background.webp",
       quickActions: [],
       lights: [
         //{ id: "10", name: "Sanca NC" },
@@ -364,7 +364,7 @@ const CLIENT_CONFIG = {
       visible: true,
       order: 2,
       name: "Jantar",
-      photo: "photo-placeholder.webp",
+      photo: "default_background.webp",
       quickActions: [],
       lights: [
         //{ id: "17", name: "Spots Jantar" },
@@ -392,7 +392,7 @@ const CLIENT_CONFIG = {
       visible: true,
       order: 3,
       name: "Varanda",
-      photo: "photo-placeholder.webp",
+      photo: "default_background.webp",
       quickActions: [],
       lights: [
         //{ id: "18", name: "Sanca NC" },
@@ -435,7 +435,7 @@ const CLIENT_CONFIG = {
       visible: true,
       order: 7,
       name: "Suíte I",
-      photo: "photo-placeholder.webp",
+      photo: "default_background.webp",
       quickActions: [],
       curtains: [],
       airConditioner: {
@@ -464,7 +464,7 @@ const CLIENT_CONFIG = {
       visible: true,
       order: 8,
       name: "Suíte II",
-      photo: "photo-placeholder.webp",
+      photo: "default_background.webp",
       quickActions: [],
       curtains: [],
       airConditioner: {
@@ -493,7 +493,7 @@ const CLIENT_CONFIG = {
       visible: true,
       order: 9,
       name: "Suíte Master",
-      photo: "photo-placeholder.webp",
+      photo: "default_background.webp",
       quickActions: [],
       curtains: [],
       airConditioner: {
@@ -525,7 +525,7 @@ const CLIENT_CONFIG = {
       visible: true,
       order: 6,
       name: "Escritório",
-      photo: "photo-placeholder.webp",
+      photo: "default_background.webp",
       quickActions: [],
       curtains: [],
       airConditioner: {
@@ -539,7 +539,7 @@ const CLIENT_CONFIG = {
       visible: true,
       order: 5,
       name: "Cozinha",
-      photo: "photo-placeholder.webp",
+      photo: "default_background.webp",
       quickActions: [],
       curtains: [],
       airConditioner: {
@@ -861,16 +861,16 @@ const DEFAULT_WEATHER_CONFIG = {
     ],
     weekdayShortNames: ["dom", "seg", "ter", "qua", "qui", "sex", "sab"],
     festiveDates: {
-      "01-01": ["Feliz Ano Novo!", "Um otimo comeco de ano!"],
+      "01-01": ["Feliz Ano Novo!", "Um otimo começo de ano!"],
       "04-21": ["Bom feriado de Tiradentes!"],
       "05-01": ["Feliz Dia do Trabalho!"],
-      "09-07": ["Feliz Independencia do Brasil!"],
-      "10-12": ["Feliz Dia das Criancas!"],
+      "09-07": ["Feliz Independência do Brasil!"],
+      "10-12": ["Feliz Dia das Crianças!"],
       "11-02": ["Bom feriado de Finados."],
-      "11-15": ["Feliz Proclamacao da Republica!"],
-      "12-24": ["Feliz vespera de Natal!"],
+      "11-15": ["Feliz Proclamação da República!"],
+      "12-24": ["Feliz véspera de Natal!"],
       "12-25": ["Feliz Natal!", "Um Natal muito especial!"],
-      "12-31": ["Boa virada de ano!", "Ultimo dia do ano!"],
+      "12-31": ["Boa virada de ano!", "Último dia do ano!"],
     },
   },
 };
