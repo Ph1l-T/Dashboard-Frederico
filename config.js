@@ -53,8 +53,8 @@ const CLIENT_CONFIG = {
         label: "Instagram Eletrize",
       },
       support: {
-        enabled: false,
-        url: "",
+        enabled: true,
+        url: "http://api.whatsapp.com/send?1=pt_BR&phone=5516997152993",
         label: "Contato via WhatsApp",
       },
     },
