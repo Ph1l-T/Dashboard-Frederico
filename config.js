@@ -25,13 +25,13 @@ const CLIENT_CONFIG = {
 
   // Segredos e regras de allowlist ficam no backend (Cloudflare Functions),
   auth: {
-    enabled: false,
+    enabled: true,
     supabaseUrl: "https://yclcrsrizurzxvnvwknq.supabase.co",
     supabaseAnonKey: "sb_publishable_3BE8SgwvhMSd3fVFKvTqWw_CCTmbScE",
     allowEmailSignUp: false,
     allowGoogleLogin: false,
     requireEmailConfirmation: true,
-    redirectTo: "https://dashboard-frederico.pages.dev/",
+    redirectTo: "",
   },
 
   clientInfo: {
