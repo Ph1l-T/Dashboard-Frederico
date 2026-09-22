@@ -94,7 +94,7 @@ const CLIENT_CONFIG = {
       routines: { label: "Rotinas", icon: "images/icons/icon-scenes.svg" },
       bluray: { label: "Blu-ray", icon: "images/icons/icon-bluray.svg" },
       appletv: { label: "Apple TV", icon: "images/icons/icon-apple-tv.svg" },
-      clarotv: { label: "Claro TV", icon: "images/icons/icon-clarotv.svg" },
+      clarotv: { label: "Vivo TV", icon: "images/icons/icon-vivotv.svg" },
       roku: { label: "Roku", icon: "images/icons/icon-roku.svg" },
       games: { label: "Games", icon: "images/icons/icon-games.svg" },
       hidromassagem: {
