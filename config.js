@@ -571,7 +571,14 @@ const CLIENT_CONFIG = {
       htv: [],
       bluray: [],
       appletv: [],
-      clarotv: [],
+      clarotv: [
+        {
+          id: "ID-CLAROTV-1",
+          name: "Vivo Suíte Master",
+          displayDeviceId: "ID-TV",
+          volumeDeviceId: "ID-TV",
+        },
+      ],
       roku: [],
       games: [],
       hidromassagem: [],
