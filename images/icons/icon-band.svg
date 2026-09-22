@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   width="475.48355"
+   height="270.56702"
+   xml:space="preserve"
+   id="svg3"
+   sodipodi:docname="icon-band.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><defs
+   id="defs3" /><sodipodi:namedview
+   id="namedview3"
+   pagecolor="#ffffff"
+   bordercolor="#000000"
+   borderopacity="0.25"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="true"
+   inkscape:deskcolor="#d1d1d1"
+   inkscape:zoom="1.3531481"
+   inkscape:cx="232.05146"
+   inkscape:cy="200.64322"
+   inkscape:window-width="1366"
+   inkscape:window-height="745"
+   inkscape:window-x="-8"
+   inkscape:window-y="1016"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="svg3" />
+	<title
+   id="title1">Band</title>
+	<g
+   transform="translate(-17.404077)"
+   id="g3">
+		<path
+   style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none"
+   d="M 488.67688,146.79137 C 464.65551,182.51329 388.71381,271.31303 254.60381,270.56229 117.23793,269.7946 46.03418,182.68598 22.052941,148.69427 16.022409,140.15399 15.723464,132.34358 21.95184,123.24937 46.03418,88.074878 120.31384,0.110915 254.28797,1.275e-4 c 136.90817,-0.1238 214.16231,92.3334755 234.14697,123.6402625 5.89598,9.23433 5.89598,14.539 0.24194,23.15098 z M 254.74101,15.87509 c -89.23102,0 -148.28719,72.893825 -148.28719,120.1114 0,44.75422 57.82261,120.09479 148.99941,120.09479 93.97399,0 150.4845,-76.33764 149.60293,-120.09479 0.58662,-48.204875 -60.89189,-120.1114 -150.31515,-120.1114 v 0"
+   id="path1" />
+		<path
+   style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none"
+   d="m 255.01941,240.53019 c 58.92591,0 106.69688,-46.96765 106.69688,-104.90212 0,-57.934492 -47.77097,-104.901155 -106.69688,-104.901155 -58.92924,0 -106.70053,46.966663 -106.70053,104.901155 0,57.93447 47.77129,104.90212 106.70053,104.90212 v 0"
+   id="path2" />
+		
+	</g>
+<metadata
+   id="metadata3"><rdf:RDF><cc:Work
+       rdf:about=""><dc:title>Band</dc:title></cc:Work></rdf:RDF></metadata></svg>
