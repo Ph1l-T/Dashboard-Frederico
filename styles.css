@@ -9411,7 +9411,7 @@ body:not(.tv-controls-on)
 
   .tv-control-wrapper[data-control-type="clarotv"] [data-portrait-section] {
     display: none;
-    min-height: fit-content;
+    min-height: 0;
     order: 3;
   }
 
@@ -9428,7 +9428,7 @@ body:not(.tv-controls-on)
     display: flex;
     flex-direction: column;
     flex: 1 1 0;
-    min-height: 0;
+    min-height: fit-content;
     animation: tvTopPanelFadeIn 0.14s ease-out both;
   }
 
