@@ -1,4 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 1024 1024">
-	<path d="M0 0h1024v1024H0z" fill="none" />
-	<path fill="#fff" d="M941.3 296.1a112.3 112.3 0 0 0-79.2-79.3C792.2 198 512 198 512 198s-280.2 0-350.1 18.7A112.12 112.12 0 0 0 82.7 296C64 366 64 512 64 512s0 146 18.7 215.9c10.3 38.6 40.7 69 79.2 79.3C231.8 826 512 826 512 826s280.2 0 350.1-18.8c38.6-10.3 68.9-40.7 79.2-79.3C960 658 960 512 960 512s0-146-18.7-215.9M423 646V378l232 133z" />
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="896"
+   height="628"
+   viewBox="0 0 896 628"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="icon-youtube.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.53027344"
+     inkscape:cx="446.93923"
+     inkscape:cy="313.98895"
+     inkscape:window-width="1366"
+     inkscape:window-height="745"
+     inkscape:window-x="-8"
+     inkscape:window-y="1016"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <path
+     fill="#ffffff"
+     d="M 877.3,98.1 A 112.3,112.3 0 0 0 798.1,18.8 C 728.2,0 448,0 448,0 448,0 167.8,0 97.9,18.7 A 112.12,112.12 0 0 0 18.7,98 C 0,168 0,314 0,314 c 0,0 0,146 18.7,215.9 10.3,38.6 40.7,69 79.2,79.3 C 167.8,628 448,628 448,628 c 0,0 280.2,0 350.1,-18.8 38.6,-10.3 68.9,-40.7 79.2,-79.3 C 896,460 896,314 896,314 c 0,0 0,-146 -18.7,-215.9 M 359,448 V 180 l 232,133 z"
+     id="path2" />
 </svg>
