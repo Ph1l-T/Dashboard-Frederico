@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg2"
+   width="439.46231"
+   height="441.93454"
+   viewBox="0 0 439.46233 441.93456"
+   sodipodi:docname="icon-globoplay.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.76393225"
+     inkscape:cx="223.84184"
+     inkscape:cy="355.39801"
+     inkscape:window-width="1366"
+     inkscape:window-height="745"
+     inkscape:window-x="-8"
+     inkscape:window-y="1016"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g10" />
+  <defs
+     id="defs6">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath20">
+      <path
+         d="M 0,1000 H 1000 V 0 H 0 Z"
+         id="path18" />
+    </clipPath>
+  </defs>
+  <g
+     id="g10"
+     transform="matrix(1.3333333,0,0,-1.3333333,-255.43276,1333.3333)">
+    <g
+       id="g14"
+       style="fill:#ffffff;fill-opacity:1"
+       transform="translate(-140.51423,232.59328)">
+      <g
+         id="g16"
+         clip-path="url(#clipPath20)"
+         style="fill:#ffffff;fill-opacity:1"
+         transform="matrix(0.99888089,0,0,0.99999971,0.960387,2.2357739e-4)">
+        <g
+           id="g22"
+           transform="translate(573.7754,507.0117)"
+           style="fill:#ffffff;fill-opacity:1">
+          <path
+             d="m 0,0 h -152.877 c -30.307,0 -46.685,17.692 -46.685,48.136 v 91.735 c 0,30.444 16.378,52.947 46.685,52.947 H 0 c 30.308,0 44.279,-22.503 44.279,-52.947 V 48.136 C 44.279,17.692 30.308,0 0,0 m -77.293,260.395 c -91.118,0 -164.983,-74.198 -164.983,-165.725 0,-91.527 73.865,-165.726 164.983,-165.726 91.118,0 164.983,74.199 164.983,165.726 0,91.527 -73.865,165.725 -164.983,165.725"
+             style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+             id="path24" />
+        </g>
+        <g
+           id="g26"
+           transform="translate(446.1802,634.3833)"
+           style="fill:#ffffff;fill-opacity:1">
+          <path
+             d="m 0,0 c 0,0 2.433,35.276 28.092,31.176 20.691,-3.306 62.959,-30.468 81.769,-48.417 7.649,-7.3 8.465,-17.005 1.176,-26.216 C 99.682,-57.806 62.656,-81.482 34.171,-92.962 27.903,-95.489 2.136,-97.253 0,-67.219 -1.832,-41.451 0,0 0,0"
+             style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+             id="path28" />
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
