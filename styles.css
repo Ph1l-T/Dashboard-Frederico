@@ -9298,7 +9298,7 @@ body:not(.tv-controls-on)
     display: flex;
     flex-direction: column;
     gap: 12px;
-    overflow: hidden;
+    overflow: scroll;
   }
 
   .tv-control-wrapper[data-control-type="clarotv"] .tv-controls-col {
@@ -9313,7 +9313,7 @@ body:not(.tv-controls-on)
     display: flex;
     gap: 8px;
     order: 0;
-    overflow: hidden;
+    overflow: visible;
     transition: gap 0.25s ease;
   }
 
@@ -9467,7 +9467,7 @@ body:not(.tv-controls-on)
 
   .tv-control-wrapper[data-control-type="clarotv"] .tv-favorite-btn {
     width: 100%;
-    height: 100%;
+    height: fit-content;
     justify-content: center;
     padding: 6px;
   }
