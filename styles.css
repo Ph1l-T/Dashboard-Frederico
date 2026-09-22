@@ -9411,7 +9411,7 @@ body:not(.tv-controls-on)
 
   .tv-control-wrapper[data-control-type="clarotv"] [data-portrait-section] {
     display: none;
-    min-height: 0;
+    min-height: fit-content;
     order: 3;
   }
 
@@ -9467,7 +9467,7 @@ body:not(.tv-controls-on)
 
   .tv-control-wrapper[data-control-type="clarotv"] .tv-favorite-btn {
     width: 100%;
-    height: fit-content;
+    height: 100%;
     justify-content: center;
     padding: 6px;
   }
