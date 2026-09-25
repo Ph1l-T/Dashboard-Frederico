@@ -484,7 +484,6 @@ const CLIENT_CONFIG = {
       roku: [],
       games: [],
       hidromassagem: [],
-      music: [],
       music: [{ id: "PENDING-FRED-A01-M01", name: "Sistema de Som" }],
     },
     ambiente7: {
