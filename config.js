@@ -379,7 +379,14 @@ const CLIENT_CONFIG = {
       htv: [],
       bluray: [],
       appletv: [],
-      clarotv: [],
+      clarotv: [
+        {
+          id: "ID-CLAROTV-1",
+          name: "Vivo Suíte Master",
+          displayDeviceId: "ID-TV",
+          volumeDeviceId: "ID-TV",
+        },
+      ],
       roku: [],
       games: [],
       hidromassagem: [],
@@ -478,15 +485,20 @@ const CLIENT_CONFIG = {
         },
       ],
       htv: [],
-      bluray: [
-        { id: "ID-BLURAY-1", name: "Blu-ray da Sala" },
-      ],
+      bluray: [],
       appletv: [],
-      clarotv: [],
+      clarotv: [
+        {
+          id: "ID-CLAROTV-1",
+          name: "Vivo Brinquedoteca",
+          displayDeviceId: "ID-TV",
+          volumeDeviceId: "ID-TV",
+        },
+      ],
       roku: [],
       games: [],
       hidromassagem: [],
-      music: [{ id: "PENDING-FRED-A01-M01", name: "Sistema de Som" }],
+      music: [],
     },
     ambiente7: {
       visible: true,
