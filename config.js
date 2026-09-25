@@ -478,7 +478,9 @@ const CLIENT_CONFIG = {
         },
       ],
       htv: [],
-      bluray: [],
+      bluray: [
+        { id: "ID-BLURAY-1", name: "Blu-ray da Sala" },
+      ],
       appletv: [],
       clarotv: [],
       roku: [],
