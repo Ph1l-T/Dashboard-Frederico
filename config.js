@@ -381,16 +381,18 @@ const CLIENT_CONFIG = {
       appletv: [],
       clarotv: [
         {
-          id: "ID-CLAROTV-1",
-          name: "Vivo Suíte Master",
-          displayDeviceId: "ID-TV",
-          volumeDeviceId: "ID-TV",
+          id: "105",
+          name: "Vivo Living Gourmet",
+          displayDeviceId: "41",
+          volumeDeviceId: "99",
         },
       ],
       roku: [],
       games: [],
       hidromassagem: [],
-      music: [],
+      music: [
+      { id: "99", name: "Receiver" },
+      ],
     },
     ambiente3: {
       visible: true,
